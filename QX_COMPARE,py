@@ -1,0 +1,31 @@
+       if (period_t[-1] == 'm'):
+            #endtime_t = endtime[-6:-2]
+            #print('endtime_t:\n',endtime_t)
+            if 1:#( "0900" < endtime_t < "1500"):
+                h_data_code         = h_data_init[code]
+                h_data              = h_data_code.loc[h_data_code['volume'] != 0]
+                if classlocal.h_data_debug_en:
+                    print('h_data_t:\n',h_data)
+                closes              = h_data['close']
+                lows                = h_data['low']
+                highs               = h_data['high']
+                opens               = h_data['open']
+                volumes             = h_data['volume']
+            else:
+                closes              = h_data[code]['close']
+                lows                = h_data[code]['low']
+                highs               = h_data[code]['high']
+                opens               = h_data[code]['open']
+                volumes             = h_data[code]['volume']
+        elif period_t[-1] =="d":
+            closes              = h_data[code]['close']
+            lows                = h_data[code]['low']
+            highs               = h_data[code]['high']
+            opens               = h_data[code]['open']
+            volumes             = h_data[code]['volume']
+        else :
+            closes              = h_data[code]['close']
+            lows                = h_data[code]['low']
+            highs               = h_data[code]['high']
+            opens               = h_data[code]['open']
+            volumes             = h_data[code]['volume']
