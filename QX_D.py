@@ -128,7 +128,7 @@ classlocal.qxlcksp                  = 8888
 classlocal.qxdf                     = 0.03   #七星下跌幅度
 classlocal.exzf                     = 0.0015 #七星二型最后一根阳线涨幅
 #飞龙
-classlocal.shenlong_en              = 1
+classlocal.TPDYX_en              = 1
 classlocal.TPDYX                    = 0
 classlocal.TPDYXsp                  = 8888
 classlocal.volume                   = 0
@@ -209,14 +209,14 @@ def init(ContextInfo):
     global deleted_rows
     #current_hold = local_hold_data_frame_init()
     if classlocal.huicedebug_en :
-        account                 = 'test'
+        account             = 'test'
     else :
-        account                 = '510000000223'
+        account             = '510000000223'
     accountType             = 'FUTURE'
-    eastmoey_stockPath      = 'D:\\eastmoney\\swc8\\config\\User\\9489316496536486\\StockwayStock.ini'
+    eastmoey_stockPath      = 'C:\\eastmoney\\swc8\\config\\User\\9489316496536486\\StockwayStock.ini'
     stockPath_sell          = 'C:\\new_tdx\\T0002\\blocknew\\QX.blk'
-    stockholdingpath        = 'C:\\Users\\q\\Desktop\\tradehistory\\datclasslocal2.csv'
-    stockrecord             = 'C:\\Users\\q\\Desktop\\tradehistory\\tradehistoryrecord.csv'
+    stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal2.csv'
+    stockrecord             = 'C:\\Users\\wukun\\Desktop\\tradehistory\\tradehistoryrecord.csv'
     Max_buynums             = 8
 
     M_Start_Time            = "09:25:00"
@@ -1745,7 +1745,7 @@ def model_process(ContextInfo,check_list):
                 shenling                     = classlocal.shenling
                 shenlingsp                   = lowmin
 
-            if classlocal.shenlong_en :
+            if classlocal.TPDYX_en :
                 MA1_short                    = ma120
                 MA1_short7                    = ma120_7
                 MA2_long                     = ma211
