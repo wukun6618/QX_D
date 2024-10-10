@@ -98,11 +98,14 @@ classlocal.trade_buy_record_dict    = {}                # 02 买入交易记录
 classlocal.buy_code_count           = 0                 # 03 风控函数，防止买入过多。
 classlocal.Reflash_buy_list         = 1
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
-classlocal.ATR_open_Length          = ATR_LEN+ATR_LEN   # 图标bar线数量为10
-classlocal.ATR_close_Length         = 4*ATR_LEN         # 图标Bar线数量为20
+classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
+
+classlocal.ATR_close_Length         = 2*ATR_LEN         # 图标Bar线数量为10
+classlocal.M_HL                     = 2*ATR_LEN         # 中轴线参数设置为10
+
 classlocal.MA_middle_length         = 184#99            # 中均线长度
 classlocal.MA_long_length           = 215#144           # 长均线长度
-classlocal.M_HL                     = 4*ATR_LEN         # 中轴线参数
+
 classlocal.ATR                      = 0  # ATR平均真实波幅
 classlocal.ATR_BuyK                 = 0  # 开多时ATR数值
 classlocal.ATR_SellK                = 0  # 开空时ATR数值
@@ -128,19 +131,14 @@ classlocal.qxlcksp                  = 8888
 
 classlocal.qxdf                     = 0.03   #七星下跌幅度
 classlocal.exzf                     = 0.0015 #七星二型最后一根阳线涨幅
-#飞龙
-classlocal.TPDYX_en              = 1
+#大阳线均线突破
+classlocal.TPDYX_en                 = 1
 classlocal.TPDYX                    = 0
 classlocal.TPDYXsp                  = 8888
 classlocal.volume                   = 0
 classlocal.selTPDYX_stopcheck       = 0
 classlocal.sellTPDYX_time           = 16    #买入后多久执行
-#以逸待劳
-classlocal.yydl_en                  = 0     #
-classlocal.yydl_length              = 10    #多少日
-classlocal.yydl                     = 0     #
-classlocal.yydlsp                   = 8888  #
-classlocal.sllastezf                = 0.060  #神零最后一根上涨幅度
+
 #神零
 classlocal.shenling_en              = 0
 classlocal.shenling_length          = 10    #多少日
@@ -178,7 +176,10 @@ classlocal.Total_market_capLast     = 0     #上次持仓次市值
 classlocal.sp_type                  = 'NONE'
 classlocal.eastmoney_zx_name        = ''
 classlocal.eastmoey_stockPath       = ''
-
+classlocal.eastmoney_user_buy_list  = ''
+classlocal.eastmoney_zx_name_list   = ''
+classlocal.stockPath_hold           = ''
+classlocal.user_buy_list            = ''
 # -------------------------------------------#
 # -------------------------------------------#
 # 判断类型
@@ -217,12 +218,14 @@ def init(ContextInfo):
     eastmoey_stockPath      = 'C:\\eastmoney\\swc8\\config\\User\\9489316496536486\\StockwayStock.ini'
     stockPath_sell          = 'C:\\new_tdx\\T0002\\blocknew\\QX.blk'
     stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal2.csv'
+    user_buy_list_path      = 'C:\\Users\\wukun\\Desktop\\tradehistory\\userbuylist.csv'
     stockrecord             = 'C:\\Users\\wukun\\Desktop\\tradehistory\\tradehistoryrecord.csv'
     Max_buynums             = 8
 
     M_Start_Time            = "09:25:00"
     M_End_Time              = "02:57:00"
     singel_zf_lastK         = 0.03
+    eastmoney_user_buy_list = ['SFT']# ['FUTURE']
     '''
     eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                               'FT8','FT9','FTA','FTB','FTC']
@@ -249,6 +252,7 @@ def init(ContextInfo):
     classlocal.eastmoey_stockPath    = eastmoey_stockPath          #买入股票路径
     classlocal.stockPath_sell        = stockPath_sell             #卖出股票路径
     classlocal.stockPath_hold        = stockholdingpath           #持仓保存路径
+    classlocal.user_buy_list_path    = user_buy_list_path              #手动加自选的记录路径
     classlocal.stockPath_recordh     = stockrecord                #本地交易记录保存
     classlocal.max_buy_nums          = Max_buynums                #最大可买入股票数量
     #classlocal.max_singbuy_price     = max_singbuy_price          #单只最高买入最大金额
@@ -261,6 +265,7 @@ def init(ContextInfo):
     classlocal.zf_lastK              = singel_zf_lastK            #最后一日个股涨幅
     #classlocal.eastmoney_zx_name     = eastmoney_zx_name          #自选分组的名字
     classlocal.eastmoney_zx_name_list = eastmoney_zx_name_listt   #自选分组名字
+    classlocal.eastmoney_user_buy_list = eastmoney_user_buy_list   #自选分组名字
     GlobalVariiable(ContextInfo)
     #从本地读取数据
     local_hold      = read_local_hold_data(classlocal.stockPath_hold,False)
@@ -327,12 +332,10 @@ def handlebar(ContextInfo):
         if not ContextInfo.is_last_bar():
             return
     '''
-
     local_hold                  = read_local_hold_data(classlocal.stockPath_hold,False)
     if classlocal.ISfirst :
         classlocal.ISfirst      = False
         Sell_list               = []
-
         handlebarcnt            = 0
         # 获取当前账户的资金信息
         #测试的时候暂时放这里
@@ -374,14 +377,13 @@ def handlebar(ContextInfo):
         print('index_time:',index_time)
         print('now_time:',now_time)
         print('classlocal.Period_Type:',classlocal.Period_Type)
-
     if Kindex > 1:
         clum = 0
         classlocal.count += 1
         #----------------------------------------------------------------------------------------------------------
         obj_list = get_trade_detail_data(ContextInfo.accID,'FUTURE','position')
         for obj in obj_list:
-            code = obj.m_strInstrumentID +'.'+obj.m_strExchangeID
+            code = obj.m_strInstrumentID + '.' + obj.m_strExchangeID
             #----------------------------------------
             #更新上次数据到local_hold_df dataframe
             uptate_local_hold_prama(code)
@@ -642,8 +644,19 @@ def handlebar(ContextInfo):
                 highs               = h_data[code]['high']
                 opens               = h_data[code]['open']
                 volumes             = h_data[code]['volume']
+            ############################################################################################################################
+            #
             #买入后多少天后方向走坏了
-            lefthand        = classlocal.selTPDYX_stopcheck and (BarSinceEntry >= classlocal.sellTPDYX_time)
+            MA_closes               = Convert_the_market_data_type(closes,lows,ML_length)
+            #昨日13日收盘价均值
+            MA_middle               = np.mean(MA_closes[-classlocal.MA_middle_length-1:-1])
+            MA_middle_7             = np.mean(MA_closes[-(classlocal.MA_middle_length+7):-7])
+            #昨日34日收盘价均值
+            MA_long                 = np.mean(MA_closes[-classlocal.MA_long_length-1:-1])
+            MA_long_7               = np.mean(MA_closes[-(classlocal.MA_long_length+7):-7])
+            sell_TPDYX_stopcheck    = MA_middle < MA_middle_7    #均线朝下检查离场
+
+            lefthand                = sell_TPDYX_stopcheck and (BarSinceEntry >= classlocal.sellTPDYX_time)
             if classlocal.TPDYX_STOP_DEBUG:
                 print('\ncode:',code)
                 print('\nselTPDYX_stopcheck :',classlocal.selTPDYX_stopcheck)
@@ -670,7 +683,6 @@ def handlebar(ContextInfo):
             if Price_SellY_Flag :
                 if classlocal.JLZY_debug_en:
                     print('进入棘轮止盈持仓信息:\n',local_hold)
-
                 #第二阶段
                 #在盈利达到Price_SetSellY%时执行棘轮止损
                 ATR_Start_time  = local_hold.loc[code,'ATR_Start_time']
@@ -681,8 +693,9 @@ def handlebar(ContextInfo):
                 ML_highs        = Convert_the_market_data_type(highs,lows,ML_length)
                 HSLS            = highs + lows
                 ML_HSLS         = Convert_the_market_data_type(HSLS,lows,ML_length)
-                #求得MLlength天内的高点低点平均值
+                #MLlength天内的高点低点平均值
                 ML_value        = np.mean(ML_HSLS) / 2
+                #当日最低的价格
                 LowPrice        = ML_lows[-1]
                 #当前中轴线参数和ATR结算时的参数保持一致
                 ATR_close_length = ML_length
@@ -715,7 +728,7 @@ def handlebar(ContextInfo):
 
                 '''
                 #为了防止第一次进来没有ATR的情况
-                ATR_BuyK = local_hold.loc[code,'ATR_BuyK']
+                ATR_BuyK                            = local_hold.loc[code,'ATR_BuyK']
                 #核心算法
                 #多止盈：当日最低价和中值的最低值 + 开仓时均线数量乘以倍数的当前ATR
                 SellY1ratio                         = classlocal.Price_SellY1_ATRratio
@@ -854,10 +867,12 @@ def handlebar(ContextInfo):
     handlebarcnt +=1
     if(classlocal.printlocalhold_en and not local_hold.empty):
         print(f'买卖前持仓信息:\n{local_hold}')
+
     #------------------------------------------------------------------------------
+    #开多
     open_long_position(model_df_level2,ContextInfo)
     #------------------------------------------------------------------------------
-    #卖出
+    #平多
     close_long_position(ContextInfo,Sell_list,local_hold)
     #------------------------------------------------------------------------------
     if(classlocal.printlocalhold_en and not local_hold.empty):
@@ -866,7 +881,64 @@ def handlebar(ContextInfo):
     write_local_hold_data(local_hold,classlocal.stockPath_hold,True)
     #写数据到本地
     #------------------------------------------------------------------------------
+###################################start###########################################################################
+#eastmoney_buy_list
+#此函数的功能是手动添加自选买入
+#执行步骤先从ini文件读取到信息，然后将详细写入本地csv表格中:
+# 1.code 2.加入时间（标记非交易时间加入的） 3.写入表格 4.假如表格的时间是与现在相同，那么选择买入，否则输出列表不包含这个
+#买入检测有效
+###################################start###########################################################################
+def eastmoney_buy_list_check(current_time_in,getstockpath, user_buy_list_name,tradingday):
+    user_buy_list       = []
+    # 01_读取待买入股票数据
+    current_time         = current_time_in[-6:]#取后六位
+    #白天
+    daytrade_time       = (current_time >= '090000') and (current_time < '101500') and \
+       (current_time >= '103000') and (current_time < '113000') and \
+       (current_time >= '133000') and (current_time < '150000')
+    #晚上
+    night_trade_time_A  = (current_time >= '210000') and (current_time < '230000')
+    night_trade_time_B  = (current_time >= '230000') and (current_time < '235959') or \
+                          (current_time >= '000000') and (current_time < '013000')
+    night_trade_time_C  = (current_time >= '013000') and (current_time < '023000')
 
+    #在trading时间内去读本地数据
+    if (daytrade_time or daytrade_time or night_trade_time_A  or night_trade_time_B or night_trade_time_C) & tradingday:
+        #从INC获取自选
+        check_list                      = parse_ini_file(getstockpath,user_buy_list_name)
+        if len(check_list)>0:
+            print('check_list_print:\n',check_list)
+        for code in check_list:
+            #查询是否本地持仓
+            local_holded_contract       =  g_query.get_total_holding(code)
+            #本地已在就不买
+            if (local_holded_contract != code):
+                code_t                  = code[2:]
+                if night_trade_time_C:
+                    #沪金 银
+                    if code_t   == 'au' or 'ag':
+                        user_buy_list               =  user_buy_list.append(code)
+                if night_trade_time_B:
+                    #铜 铝 氧化铝 锌 铅 镍 锡
+                    if code_t   == 'cu' or 'al' or 'ao' or 'zn' or 'pb' or 'ni' or 'sn' or \
+                                   'ss' or 'au' or 'ag':
+                        user_buy_list               =  user_buy_list.append(code)
+                #21:00 -23:00
+                if night_trade_time_A:
+                    if code_t =='cu' or 'al' or 'ao' or 'zn' or 'pb' or 'ni' or 'sn' or \
+                                'ss' or 'au' or 'ag' or 'rb' or 'hc' or 'fu' or 'bu' or \
+                                'ru' or 'br' or 'sp' or 'a2' or 'b2' or 'y2' or \
+                                'm2' or 'p2' or 'c2' or 'cs' or 'rr' or 'jm' or \
+                                'j2' or 'i2' or 'pg' or 'l2' or 'v2' or 'eg' or 'pp' or \
+                                'eb' or 'lh' or 'FG' or 'TA' or 'PR' or \
+                                'PX' or 'MA' or 'SA' or 'SH' or \
+                                'SR' or 'CF' or 'CY' or 'OL' or 'RM' or \
+                                'lc' or 'nr' or 'lu' :
+                        user_buy_list               =  user_buy_list.append(code)
+                if daytrade_time:
+                    user_buy_list               =  user_buy_list.append(code)
+        #------------------------------------------------------------------------------
+    return user_buy_list
 ###################################start###########################################################################
 #多头开仓
 ###################################start###########################################################################
@@ -1395,7 +1467,7 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     JRZGD           = high[-1] >= highmax  #突破这天就是近日最高点
     low_12          = min(low[-1],low[-2],low[-3])
 
-    classlocal.selTPDYX_stopcheck = MA1_short < MA1_short7    #均线朝下检查离场
+
     righthand       = DTCS and YXSC and JRZGD
     if classlocal.TPDYX_debug_en:
         if righthand:
@@ -1418,66 +1490,6 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
 ###################################start###########################################################################
 #
 ###################################start###########################################################################
-def yydl_checkout():
-    close   = classlocal.close
-    open    = classlocal.open
-    low     = classlocal.low
-    high    = classlocal.high
-    volume  = classlocal.volume
-    classlocal.yydl    =  0
-    #获取个股昨日收盘价
-    lastprice   = close[-1]
-    #昨日13日收盘价均值
-    ma13        = np.mean(close[-classlocal.MAength1-1:-1])
-    #昨日34日收盘价均值
-    ma34        =np.mean(close[-classlocal.MAength2-1:-1])
-    #如果13日均线上穿34日均线，且昨日收盘价位于13日均线之上
-    righthand   =  (lastprice > ma13) and (ma13 > ma34) and (close[-1] > open[-1])
-    righthand   = 1
-
-    if (righthand):
-
-        fifthyin        = close[-5] < open[-5]
-        fourthyin       = close[-4] < open[-4]
-        thirdyin        = close[-3] < open[-3]
-        secondyang      = close[-2] > open[-2]
-        firstyang       = close[-1] > open[-1]
-        firstyangzf     = (close[-1] - open[-2]) / open[-2] < classlocal.sllastezf
-        secondyangzf    = (close[-2] - open[-3]) / open[-3] < classlocal.sllastezf
-        #阳线收盘大于止跌阳线的收盘，意在说明止跌
-        first_second    = close[-1] > close[-2]
-        yinyangtj       = fifthyin and fourthyin  and first_second and secondyangzf and \
-                          thirdyin and secondyang and firstyang and firstyangzf
-        sixth_h    = high[-6] > high[-5]
-        fifth_h    = high[-5] > high[-4]
-        fourth_h   = high[-4] > high[-3]
-        tiaojian_h = sixth_h and fifth_h and fourth_h
-        sixth_l    = low[-6] > low[-5]
-        fifth_l    = low[-5] > low[-4]
-        fourth_l   = low[-4] > low[-3]
-        tiaojian_l = sixth_l and fifth_l and fourth_l
-        sixth_c    = close[-6] > close[-5]
-        fifth_c    = close[-5] > close[-4]
-        fourth_c   = close[-4] > close[-3]
-        tiaojian_c = sixth_c and fifth_c and fourth_c
-        sixth_o    = open[-6] > open[-5]
-        fifth_o    = open[-5] > open[-4]
-        fourth_o   = open[-4] > open[-3]
-        tiaojian_o = sixth_o and fifth_o and fourth_o
-        sixth_v    = volume[-6] > volume[-5]
-        fifth_v    = volume[-5] > volume[-4]
-        fourth_v   = volume[-4] > volume[-3]
-        tiaojian_v = sixth_v and fifth_v and fourth_v
-
-        yydl       = yinyangtj and tiaojian_h and tiaojian_l and \
-                     tiaojian_c and tiaojian_o and tiaojian_v
-        yydlsp     = np.min(low)
-
-        classlocal.yydl    = yydl
-        classlocal.yydlsp  = yydlsp
-    else:
-        classlocal.yydl    = 0
-        classlocal.yydlsp  = 8888
 
 ###################################start###########################################################################
 #classlocal.shenling    = 0
@@ -1662,14 +1674,15 @@ def model_process(ContextInfo,check_list):
     endtime             = classlocal.Kindex_time
     td                  = classlocal.Kindex_time
     #获取数据           #
-    length1              = classlocal.modul_length+5
+    length1             = classlocal.modul_length+5
     period_t            = classlocal.Period_Type
    # h_data              = get_market_data_ex_modify(ContextInfo,check_list,period_t,endtime,length1)
     #
-    h_data_init              = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
+    h_data_init         = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
                         check_list,period = period_t,end_time=endtime,count=length1,\
                         dividend_type='front', fill_data=True, subscribe = True)
     #h_data_t              = get_market_data_ex_modify(ContextInfo,code,period_t,endtime,length1)
+
     if classlocal.h_data_debug_en:
         print('check_list:\n',check_list)
         print('period_t:\n',period_t)
@@ -1753,55 +1766,46 @@ def model_process(ContextInfo,check_list):
             classlocal.volume    = volume
 
             #昨日13日收盘价均值
-            ma120                = np.mean(close[-classlocal.MAength1-1:-1])
-            ma120_7              = np.mean(close[-(classlocal.MAength1+7):-7])
+            ma120                = np.mean(close[-classlocal.MA_middle_length-1:-1])
+            ma120_7              = np.mean(close[-(classlocal.MA_middle_length+7):-7])
             #昨日34日收盘价均值
-            ma211                = np.mean(close[-classlocal.MAength2-1:-1])
-            ma211_7              = np.mean(close[-(classlocal.MAength2+7):-7])
-            #如果13日均线上穿34日均线，且昨日收盘价位于13日均线之上
-            righthand            =  0
-            righthand =  (ma211 > ma211_7)
-            #righthand =  (ma120 > ma144) or((ma120 < ma144) and (close[-1] > ma120 ) and (ma120_7 < ma120))
+            ma211                = np.mean(close[-classlocal.MA_long_length-1:-1])
+            ma211_7              = np.mean(close[-(classlocal.MA_long_length+7):-7])
+
+            righthand            =  (ma211 > ma211_7)
 
             qxlck                = 0
             diao                 = 0
             shenling             = 0
             TPDYX                = 0
-            yydl                 = 0  #
             if classlocal.qxlck_en :
                 if righthand != 0:
                     QXLCK_checkout()
-                    qxlck                        = classlocal.qxlck
-                    qxlcksp                      = classlocal.qxlcksp
+                    qxlck                    = classlocal.qxlck
+                    qxlcksp                  = classlocal.qxlcksp
             if classlocal.diao_en :
                 YJSD_checkout()
                 diao                         = classlocal.diao
                 diaosp                       = classlocal.diaosp
             if classlocal.shenling_en :
                 shengling_checkout()
-
                 shenling                     = classlocal.shenling
                 shenlingsp                   = lowmin
-
-            if classlocal.TPDYX_en :
+            if classlocal.TPDYX_en:
                 MA1_short                    = ma120
-                MA1_short7                    = ma120_7
+                MA1_short7                   = ma120_7
                 MA2_long                     = ma211
                 MA2_long7                    = ma211_7
                 TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
-                #
-                TPDYX                      = classlocal.TPDYX
-                TPDYXsp                    = classlocal.TPDYXsp
+                TPDYX                        = classlocal.TPDYX
+                TPDYXsp                      = classlocal.TPDYXsp
 
-            if classlocal.yydl_en :
-                yydl_checkout()
-                yydl                         = classlocal.yydl
-                yydlsp                       = classlocal.yydlsp
+
             last_price                       = close[-1]
             #---------------------------------------------------------------------------------------
             #qxlck = 0
             #timecycle = ' 日K '
-            ART_length                       = classlocal.ATRLength1
+            ART_length                       = classlocal.ATR_open_Length
             if qxlck == 1:
                 strqxlx                      = ":"+"七星一型"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(qxlcksp,2)
@@ -1870,20 +1874,6 @@ def model_process(ContextInfo,check_list):
                 #print(f'G_df\n,{G_df}')
                 #print('一箭双雕',code)
                 send(td,code,str(decimal_places_are_rounded(TPDYXsp,2)),strTPDYX)
-            if yydl:
-                stryydl                      = ":"+"以逸待劳"
-                G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(yydlsp,2)
-                buy_atr                      = calculate_ATR(high,low,close,ART_length)
-                G_df.loc[code,'ATR_BuyK']    = buy_atr
-                G_df.loc[code,'Tradingday']  = td
-                sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
-                zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
-                G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
-                G_df.loc[code,'Kindex']      = int(index)
-                #print(f'G_df\n,{G_df}')
-                #print('一箭双雕',code)
-                send(td,code,str(decimal_places_are_rounded(yydlsp,2)),stryydl)
     #if not G_df.empty:
     #    print(f'G_df,{G_df}')
     return G_df
@@ -1898,7 +1888,7 @@ def calculate_ATR_from_buy_time(ContextInfo,buytime,code) :
     td          = buytime
     check_list  = code
     buy_atr     = 0
-    length      = classlocal.ATRLength1
+    length      = classlocal.ATR_open_Length
     h_data      = ContextInfo.get_market_data_ex(['close','high','open','low'],\
         check_list,period = classlocal.Period_Type,end_time = td,count = (8+length),\
         dividend_type='front', fill_data=True, subscribe = True)
@@ -1979,7 +1969,7 @@ def read_from_csv(file_path,index1):
 
 def local_hold_data_frame_init():
     global locallist_clolums
-    list_data_values  =  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
+    list_data_values  = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
     locallist_clolums = ['Code','Buy_time','Price_BuyK','mBuy_KIndex','mLast_KIndex','BarSinceEntry','Price_SellY','Price_SellY1','Price_SellS',\
                         'Price_SellS1','dLastPrice','dProfitRate','Price_SellY_Flag','nVolume','nCanUseVolume',\
                         'PositionProfit','ATR_Start_time','dMarketValue','Tradingday','strInstrumentID','ATR_BuyK']
@@ -2021,7 +2011,6 @@ def read_local_hold_data(file_path,index1):
 
     data         = read_from_csv(file_path,index1)
     return data
-
 ###################################start###########################################################################
 #
 ###################################start###########################################################################
