@@ -62,8 +62,8 @@ import configparser
 import xml.etree.ElementTree as ET
 from xml.dom.minidom import parse
 import os
-
 import talib
+
 pd.set_option('expand_frame_repr', False)  #不换行
 pd.set_option('display.max_rows', 5000)     #最多显示数据的行数
 pd.set_option('display.unicode.ambiguous_as_wide', True) # 中文字段对齐
@@ -96,11 +96,12 @@ classlocal.count                    = 0                 # 01 记录定时函数�
 classlocal.Period_Type              = '15m'
 classlocal.trade_buy_record_dict    = {}                # 02 买入交易记录
 classlocal.buy_code_count           = 0                 # 03 风控函数，防止买入过多。
-classlocal.Reflash_buy_list         = 1                 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
-classlocal.ATRLength1               = ATR_LEN+ATR_LEN   # 图标bar线数量为10
-classlocal.ATRLength2               = 4*ATR_LEN         # 图标Bar线数量为20
-classlocal.MAength1                 = 184#99            # 图标bar线数量为
-classlocal.MAength2                 = 215#144           # 图标Bar线数量为
+classlocal.Reflash_buy_list         = 1
+# 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
+classlocal.ATR_open_Length          = ATR_LEN+ATR_LEN   # 图标bar线数量为10
+classlocal.ATR_close_Length         = 4*ATR_LEN         # 图标Bar线数量为20
+classlocal.MA_middle_length         = 184#99            # 中均线长度
+classlocal.MA_long_length           = 215#144           # 长均线长度
 classlocal.M_HL                     = 4*ATR_LEN         # 中轴线参数
 classlocal.ATR                      = 0  # ATR平均真实波幅
 classlocal.ATR_BuyK                 = 0  # 开多时ATR数值
@@ -596,6 +597,51 @@ def handlebar(ContextInfo):
             Price_SellY     = local_hold.loc[code,'Price_SellY']
             Price_SellY1    = local_hold.loc[code,'Price_SellY1']
             #---------------------------------------------------------------------------------------------------------------------------
+            ############################################################################################################################
+            #这个区域部分是公共的获取行情信息，输出的数据格式是np.arry
+            ############################################################################################################################
+            check_list      = []
+            td              = index_time
+            classlocal.ATR  = 0
+            #check_list.append(code)
+            check_list      = code
+            total_length    = classlocal.MA_long_length#长均线长度，值是最大的
+            h_data_init     = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
+                check_list,period = classlocal.Period_Type,end_time=td,count=(total_length+10),\
+                dividend_type='front', fill_data=True, subscribe = True)
+
+            period_t        = classlocal.Period_Type
+            if (period_t[-1] == 'm'):
+                    #endtime_t = endtime[-6:-2]
+                    #print('endtime_t:\n',endtime_t)
+                    if 1:#( "0900" < endtime_t < "1500"):
+                        h_data_code         = h_data_init[code]
+                        h_data              = h_data_code.loc[h_data_code['volume'] != 0]
+                        if classlocal.h_data_debug_en:
+                            print('h_data_t:\n',h_data)
+                        closes              = h_data['close']
+                        lows                = h_data['low']
+                        highs               = h_data['high']
+                        opens               = h_data['open']
+                        volumes             = h_data['volume']
+                    else:
+                        closes              = h_data[code]['close']
+                        lows                = h_data[code]['low']
+                        highs               = h_data[code]['high']
+                        opens               = h_data[code]['open']
+                        volumes             = h_data[code]['volume']
+            elif period_t[-1] =="d":
+                closes              = h_data[code]['close']
+                lows                = h_data[code]['low']
+                highs               = h_data[code]['high']
+                opens               = h_data[code]['open']
+                volumes             = h_data[code]['volume']
+            else :
+                closes              = h_data[code]['close']
+                lows                = h_data[code]['low']
+                highs               = h_data[code]['high']
+                opens               = h_data[code]['open']
+                volumes             = h_data[code]['volume']
             #买入后多少天后方向走坏了
             lefthand        = classlocal.selTPDYX_stopcheck and (BarSinceEntry >= classlocal.sellTPDYX_time)
             if classlocal.TPDYX_STOP_DEBUG:
@@ -606,6 +652,8 @@ def handlebar(ContextInfo):
             if lefthand:
                 classlocal.sp_type = '行情止损'
                 Sell_list.append(code)
+            ############################################################################################################################
+            ############################################################################################################################
             #---------------------------------------------------------------------------------------------------------------------------
             #第一阶段
             #达到第一止盈位置,进来一次就不会再进来,本地上也会更新
@@ -618,7 +666,6 @@ def handlebar(ContextInfo):
                 BarSinceEntry                                   = 0
                 Price_SellY_Flag                                = 1
             #---------------------------------------------------------------------------------------------------------------------------
-
             #print('Price_SellY_Flag',Price_SellY_Flag)
             if Price_SellY_Flag :
                 if classlocal.JLZY_debug_en:
@@ -628,61 +675,36 @@ def handlebar(ContextInfo):
                 #在盈利达到Price_SetSellY%时执行棘轮止损
                 ATR_Start_time  = local_hold.loc[code,'ATR_Start_time']
                 ATR_BuyK        = local_hold.loc[code,'ATR_BuyK']
-                check_list      = []
-                td              = index_time
-                classlocal.ATR  = 0
-                check_list.append(code)
-                MLlength        = classlocal.M_HL #20
-                length          = classlocal.ATRLength1 + MLlength #5 + 20
-                h_data_init     = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
-                    check_list,period = classlocal.Period_Type,end_time=td,count=(length+10),\
-                    dividend_type='front', fill_data=True, subscribe = True)
+                ML_length       =classlocal.M_HL
+                ML_closes       = Convert_the_market_data_type(closes,lows,ML_length)
+                ML_lows         = Convert_the_market_data_type(lows,lows,ML_length)
+                ML_highs        = Convert_the_market_data_type(highs,lows,ML_length)
+                HSLS            = highs + lows
+                ML_HSLS         = Convert_the_market_data_type(HSLS,lows,ML_length)
+                #求得MLlength天内的高点低点平均值
+                ML_value        = np.mean(ML_HSLS) / 2
+                LowPrice        = ML_lows[-1]
+                #当前中轴线参数和ATR结算时的参数保持一致
+                ATR_close_length = ML_length
+                classlocal_ATR  = calculate_ATR(ML_highs,ML_lows,ML_closes,ATR_close_length)*classlocal.TC_ATRratio
+                classlocal.ATR  = decimal_places_are_rounded(classlocal_ATR,2)
+                #第一次ATR的值
+                if int(ATR_BuyK) == 0 or int(ATR_Start_time) == 0:
+                    ATR_BuyK                        = classlocal.ATR
+                    local_hold.loc[code,'ATR_BuyK'] = ATR_BuyK
+                '''
+                ML_highs         = highs[-MLlength:]
+                ML_lows          = lows[-MLlength:]
+                ML_closes         = closes[-MLlength:]
 
-                period_t        = classlocal.Period_Type
-                if (period_t[-1] == 'm'):
-                        #endtime_t = endtime[-6:-2]
-                        #print('endtime_t:\n',endtime_t)
-                        if 1:#( "0900" < endtime_t < "1500"):
-                            h_data_code         = h_data_init[code]
-                            h_data              = h_data_code.loc[h_data_code['volume'] != 0]
-                            if classlocal.h_data_debug_en:
-                                print('h_data_t:\n',h_data)
-                            closes              = h_data['close']
-                            lows                = h_data['low']
-                            highs               = h_data['high']
-                            opens               = h_data['open']
-                            volumes             = h_data['volume']
-                        else:
-                            closes              = h_data[code]['close']
-                            lows                = h_data[code]['low']
-                            highs               = h_data[code]['high']
-                            opens               = h_data[code]['open']
-                            volumes             = h_data[code]['volume']
-                elif period_t[-1] =="d":
-                    closes              = h_data[code]['close']
-                    lows                = h_data[code]['low']
-                    highs               = h_data[code]['high']
-                    opens               = h_data[code]['open']
-                    volumes             = h_data[code]['volume']
-                else :
-                    closes              = h_data[code]['close']
-                    lows                = h_data[code]['low']
-                    highs               = h_data[code]['high']
-                    opens               = h_data[code]['open']
-                    volumes             = h_data[code]['volume']
-
-
-                LowPrice        = 900000
-                lowmin          = lows.min()
-                MLhighs         = highs[-MLlength:]
-                MLlows          = lows[-MLlength:]
-                ML_HSLS         = MLhighs + MLlows
+                lowmin          = ML_lows.min()
+                ML_HSLS         = ML_highs + ML_lows
                 ML_value        = np.array(ML_HSLS)
                 ML_value        = np.mean(ML_value) / 2
                 if lowmin > 0 :
-                    close           = np.array(closes)
-                    low             = np.array(lows)
-                    high            = np.array(highs)
+                    close           = np.array(ML_closes)
+                    low             = np.array(ML_lows)
+                    high            = np.array(ML_highs)
                     LowPrice        = low[-1]
                     classlocal_ATR  = calculate_ATR(high,low,close,length)*classlocal.TC_ATRratio
                     classlocal.ATR  = decimal_places_are_rounded(classlocal_ATR,2)
@@ -690,6 +712,8 @@ def handlebar(ContextInfo):
                     if int(ATR_BuyK) == 0 or int(ATR_Start_time) == 0:
                         ATR_BuyK                        = classlocal.ATR
                         local_hold.loc[code,'ATR_BuyK'] = ATR_BuyK
+
+                '''
                 #为了防止第一次进来没有ATR的情况
                 ATR_BuyK = local_hold.loc[code,'ATR_BuyK']
                 #核心算法
@@ -1363,7 +1387,7 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     low             = classlocal.low[-20:]
     high            = classlocal.high[-10:]
 
-    highmax         = max(high)    #classlocal.highmax                                                         #6日最高点
+    highmax         = max(high)    #classlocal.highmax                                           #6日最高点
     lowmin          = classlocal.lowmin                                                          #20日最低点
 
     DTCS            = (MA1_short > MA2_long) and (MA2_long > MA2_long7)                          #均线多头朝上
@@ -1566,6 +1590,20 @@ def Perform_stock_picks(ContextInfo,stockpath,eastmoney_zx_name,compare_df):
     if classlocal.mp_debug_origin_en and not model_record_dftt.empty:
         print('模型选出退出\n:',m_df_lv2)
     return m_df_lv2
+
+###################################start###########################################################################
+#Convert_the_market_data_type
+#输入tradedatas得到一个arry,可以用来计算ATR和均线,当最小最有效时才计算
+###################################start###########################################################################
+def Convert_the_market_data_type(tradedatas,tradedata_lows,length):
+    tradedata_nparry                = []
+    tradedatas                      = tradedatas[-length:]
+    lows                            = tradedata_lows[-length:]
+    lowmin                          = lows.min()
+    if lowmin > 0 :
+        tradedata_nparry            = np.array(tradedatas)
+
+    return tradedata_nparry
 ###################################start###########################################################################
 #calculate_ATR:计算length 周期内的平均波幅
 #输入:high 是一定周期内的最高值是一个pd.serious 不单单是一个值
