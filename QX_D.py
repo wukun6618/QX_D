@@ -78,17 +78,17 @@ classlocal = b()
 classlocal.printmoney_en            = 0
 classlocal.printlocalhold_en        = 0
 classlocal.sell_debug_inf_en        = 0
-classlocal.checklist_debug_en       = 0 #打印本地自选股行情
+classlocal.checklist_debug_en       = 1 #打印本地自选股行情
 classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 1 #棘轮止盈打印
 classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
-classlocal.mp_debug_origin_en       = 0 #模型选出打印
+classlocal.mp_debug_origin_en       = 1 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
 classlocal.TPDYX_debug_en           = 1 #debug信息打印
-classlocal.TPDYX_STOP_DEBUG         = 0 #行情止损打印
+classlocal.TPDYX_STOP_DEBUG         = 1 #行情止损打印
 # -------------------------------------------#
 # 数据类型
 classlocal.p                        = 0                 #绘图点用
@@ -217,7 +217,7 @@ def init(ContextInfo):
     accountType             = 'FUTURE'
     eastmoey_stockPath      = 'C:\\eastmoney\\swc8\\config\\User\\9489316496536486\\StockwayStock.ini'
     stockPath_sell          = 'C:\\new_tdx\\T0002\\blocknew\\QX.blk'
-    stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal2.csv'
+    stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal1.csv'
     user_buy_list_path      = 'C:\\Users\\wukun\\Desktop\\tradehistory\\userbuylist.csv'
     stockrecord             = 'C:\\Users\\wukun\\Desktop\\tradehistory\\tradehistoryrecord.csv'
     Max_buynums             = 8
@@ -609,7 +609,7 @@ def handlebar(ContextInfo):
             check_list      = code
             total_length    = classlocal.MA_long_length#长均线长度，值是最大的
             h_data_init     = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
-                check_list,period = classlocal.Period_Type,end_time=td,count=(total_length+10),\
+                code,period = classlocal.Period_Type,end_time=td,count=(total_length+10),\
                 dividend_type='front', fill_data=True, subscribe = True)
 
             period_t        = classlocal.Period_Type
@@ -1197,7 +1197,7 @@ def position_opening_calculat(ContextInfo,buy_list):
     Kindex              = classlocal.Kindex
     classlocal.ATR      = 0
 
-    length              = classlocal.ATRLength2
+    length              = classlocal.ATR_open_Length
     h_data              = ContextInfo.get_market_data_ex(['close','high','open','low','LastPrice'],
     buy_list,period     = classlocal.Period_Type,end_time = td,count = 20,
     dividend_type='front', fill_data=True, subscribe = True)
@@ -1727,12 +1727,7 @@ def model_process(ContextInfo,check_list):
             opens               = h_data[code]['open']
             volumes             = h_data[code]['volume']
 
-        if(classlocal.checklist_debug_en):
-            print(f'period_t[-1]\n{period_t[-1]}')
-            print(f'endtime_t\n{endtime_t}')
-            print(f'h_data\n{h_data}')
-            print(f'h_data\n{type(h_data)}')
-            print(f'check_list\n{check_list}')
+
         closes_opens_dict   = closes - opens
         closemin            = closes.min()
         openmin             = opens.min()
@@ -1745,6 +1740,16 @@ def model_process(ContextInfo,check_list):
         highmax             = decimal_places_are_rounded(highmax,3)
         lowmin              = decimal_places_are_rounded(lowmin,3)
         #print(code,closes)
+        if(classlocal.checklist_debug_en):
+            print(f'period_t[-1]\n{period_t[-1]}')
+            #print(f'endtime_t\n{endtime_t}')
+            print(f'h_data\n{h_data}')
+            print(f'h_data\n{type(h_data)}')
+            print(f'closemin\n{closemin}')
+            print(f'openmin\n{openmin}')
+            print(f'lowmin\n{lowmin}')
+            print(f'highmax\n{highmax}')
+
         if((closemin > 0) and (openmin > 0) and (lowmin > 0) and highmax):
             #print('G_df.loc[code,'Price_SellS']:',G_df.loc[code,'Price_SellS'])
             #转成数组可以按照index取值
@@ -1772,13 +1777,14 @@ def model_process(ContextInfo,check_list):
             ma211                = np.mean(close[-classlocal.MA_long_length-1:-1])
             ma211_7              = np.mean(close[-(classlocal.MA_long_length+7):-7])
 
-            righthand            =  (ma211 > ma211_7)
+            
 
             qxlck                = 0
             diao                 = 0
             shenling             = 0
             TPDYX                = 0
             if classlocal.qxlck_en :
+                righthand            =  (ma211 > ma211_7)
                 if righthand != 0:
                     QXLCK_checkout()
                     qxlck                    = classlocal.qxlck
