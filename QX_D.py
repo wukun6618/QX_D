@@ -71,6 +71,8 @@ pd.set_option('display.unicode.east_asian_width', True)
 pd.set_option('display.float_format', lambda x: '%.3f' % x) # dataframe格式化输出
 list_data_values = []#[[0,0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 ATR_LEN = 5
+SELL_RATIO = 3
+SELL_BASE_DIANSHU =0.02
 class b():
     pass
 classlocal = b()
@@ -78,17 +80,17 @@ classlocal = b()
 classlocal.printmoney_en            = 0
 classlocal.printlocalhold_en        = 0
 classlocal.sell_debug_inf_en        = 0
-classlocal.checklist_debug_en       = 1 #打印本地自选股行情
+classlocal.checklist_debug_en       = 0 #打印本地自选股行情
 classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 1 #棘轮止盈打印
 classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
-classlocal.mp_debug_origin_en       = 1 #模型选出打印
+classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
-classlocal.h_data_debug_en          = 1 #打印执行选股前的行情数据
-classlocal.TPDYX_debug_en           = 1 #debug信息打印
-classlocal.TPDYX_STOP_DEBUG         = 1 #行情止损打印
+classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
+classlocal.TPDYX_debug_en           = 0 #debug信息打印
+classlocal.TPDYX_STOP_DEBUG         = 0 #行情止损打印
 # -------------------------------------------#
 # 数据类型
 classlocal.p                        = 0                 #绘图点用
@@ -147,13 +149,14 @@ classlocal.shenlingsp               = 8888
 classlocal.sldf                     = 0.043  #神零下跌幅度
 classlocal.slsecondedf              = 0.005  #神零下跌幅度#0.008
 
-classlocal.Price_SetSellS           = 0.02  #默认五个点止损,无论如何都会在
-classlocal.Price_SetSellY           = 3     #盈亏比设置为3
+classlocal.Price_SetSellS           = SELL_BASE_DIANSHU  #默认五个点止损,无论如何都会在
+classlocal.Price_SetSellYBILI       = 3    #盈亏比设置为3
+classlocal.Price_SetSellYratio      = SELL_BASE_DIANSHU*3  #盈亏比设置为3
 classlocal.Price_SellS1_ATRratio    = 15    #ATR棘轮止损默认
 classlocal.Price_SellY1_ATRratio    = 0.01   #ATR 止盈 默认比例 越大约灵敏大
 classlocal.TC_ATRratio              = 1.0
 
-classlocal.Price_SellY1_ratio       = 0.6   #涨到80个点止盈
+classlocal.Price_SellY1_ratio       = 0.06   #涨到个点止盈,手动买入时生效
 classlocal.Price_SellY              = 0     #棘轮止盈利开始价格
 classlocal.Price_SellY1             = 0     #棘轮止盈止盈价格,根据ATR值相关
 classlocal.BarSinceEntrySet         = 200  #N天时间止损
@@ -552,7 +555,7 @@ def handlebar(ContextInfo):
             #预设止盈ATR
             Price_SellY1        = local_hold.loc[code,'Price_SellY1']
             #第一止盈位置 默认0.08
-            Price_SetSellY      = classlocal.Price_SetSellY
+            Price_SetSellYratio      = classlocal.Price_SetSellYratio
             #第二止盈位置
             Price_SellS1_t      = local_hold.loc[code,'Price_SellS1']
             Price_SellS1        = decimal_places_are_rounded(Price_SellS1_t,2)
@@ -577,7 +580,7 @@ def handlebar(ContextInfo):
             if local_hold.loc[code,'Price_SellY'] <= 0 or pd.isna(Price_SellY):
                 local_hold.loc[code,'Price_SellY_Flag'] = 0
                 #第一止盈位置
-                Price = Price_BuyK * (Price_SetSellY+1)
+                Price = Price_BuyK * (Price_SetSellYratio+1)
                 local_hold.loc[code,'Price_SellY']      = decimal_places_are_rounded(Price,2)
                 #Price_SellY1初始值
                 local_hold.loc[code,'Price_SellY1']     = local_hold.loc[code,'Price_SellY']
@@ -602,19 +605,20 @@ def handlebar(ContextInfo):
             ############################################################################################################################
             #这个区域部分是公共的获取行情信息，输出的数据格式是np.arry
             ############################################################################################################################
-            #index               = classlocal.Kindex
+
             endtime             = classlocal.Kindex_time
-           # td                  = classlocal.Kindex_time
-            #获取数据           #
             length1             = classlocal.modul_length+5
             period_t            = classlocal.Period_Type
-        # h_data              = get_market_data_ex_modify(ContextInfo,check_list,period_t,endtime,length1)
-            #
+            code_list           = [code]
             print('codemain:',code)
-            h_data_init         = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
-                                code,period = period_t,end_time = endtime,count = length1,\
-                                dividend_type='front', fill_data=True, subscribe = True)
+            print('period_t:',period_t)
+            print('endtime:',endtime)
+            print('length1:',length1)
 
+            h_data_init         = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
+                                code_list,period = period_t,end_time = endtime,count = length1,\
+                                dividend_type='front', fill_data=True, subscribe = True)
+            
             period_t        = classlocal.Period_Type
             if (period_t[-1] == 'm'):
                     #endtime_t = endtime[-6:-2]
@@ -650,6 +654,7 @@ def handlebar(ContextInfo):
             ############################################################################################################################
             #
             #买入后多少天后方向走坏了
+            ML_length               =classlocal.M_HL
             MA_closes               = Convert_the_market_data_type(closes,lows,ML_length)
             #昨日13日收盘价均值
             MA_middle               = np.mean(MA_closes[-classlocal.MA_middle_length-1:-1])
@@ -1876,7 +1881,7 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellYBILI
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
                 G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Kindex']      = int(index)
