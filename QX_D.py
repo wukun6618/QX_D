@@ -86,7 +86,7 @@ classlocal.JLZY_debug_en            = 1 #棘轮止盈打印
 classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 1 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
-classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
+classlocal.h_data_debug_en          = 1 #打印执行选股前的行情数据
 classlocal.TPDYX_debug_en           = 1 #debug信息打印
 classlocal.TPDYX_STOP_DEBUG         = 1 #行情止损打印
 # -------------------------------------------#
@@ -602,15 +602,18 @@ def handlebar(ContextInfo):
             ############################################################################################################################
             #这个区域部分是公共的获取行情信息，输出的数据格式是np.arry
             ############################################################################################################################
-            check_list      = []
-            td              = index_time
-            classlocal.ATR  = 0
-            #check_list.append(code)
-            check_list      = code
-            total_length    = classlocal.MA_long_length#长均线长度，值是最大的
-            h_data_init     = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
-                code,period = classlocal.Period_Type,end_time=td,count=(total_length+10),\
-                dividend_type='front', fill_data=True, subscribe = True)
+            #index               = classlocal.Kindex
+            endtime             = classlocal.Kindex_time
+           # td                  = classlocal.Kindex_time
+            #获取数据           #
+            length1             = classlocal.modul_length+5
+            period_t            = classlocal.Period_Type
+        # h_data              = get_market_data_ex_modify(ContextInfo,check_list,period_t,endtime,length1)
+            #
+            print('codemain:',code)
+            h_data_init         = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
+                                code,period = period_t,end_time = endtime,count = length1,\
+                                dividend_type='front', fill_data=True, subscribe = True)
 
             period_t        = classlocal.Period_Type
             if (period_t[-1] == 'm'):
