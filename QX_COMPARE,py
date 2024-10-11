@@ -71,6 +71,8 @@ pd.set_option('display.unicode.east_asian_width', True)
 pd.set_option('display.float_format', lambda x: '%.3f' % x) # dataframe格式化输出
 list_data_values = []#[[0,0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 ATR_LEN = 5
+SELL_RATIO = 3
+SELL_BASE_DIANSHU =0.02
 class b():
     pass
 classlocal = b()
@@ -148,18 +150,19 @@ classlocal.shenlingsp               = 8888
 classlocal.sldf                     = 0.043  #神零下跌幅度
 classlocal.slsecondedf              = 0.005  #神零下跌幅度#0.008
 
-classlocal.Price_SetSellS           = 0.015  #默认五个点止损,无论如何都会在
-classlocal.Price_SetSellY           = 3     #盈亏比设置为3
+classlocal.Price_SetSellS           = SELL_BASE_DIANSHU  #默认五个点止损,无论如何都会在
+classlocal.Price_SetSellYBILI       = 3    #盈亏比设置为3
+classlocal.Price_SetSellYratio = SELL_BASE_DIANSHU*3  #盈亏比设置为3
 classlocal.Price_SellS1_ATRratio    = 15    #ATR棘轮止损默认
 classlocal.Price_SellY1_ATRratio    = 0.01   #ATR 止盈 默认比例 越大约灵敏大
 classlocal.TC_ATRratio              = 1.0
 
-classlocal.Price_SellY1_ratio       = 0.6   #涨到80个点止盈
+classlocal.Price_SellY1_ratio       = 0.06   #涨到个点止盈,手动买入时生效
 classlocal.Price_SellY              = 0     #棘轮止盈利开始价格
 classlocal.Price_SellY1             = 0     #棘轮止盈止盈价格,根据ATR值相关
 classlocal.BarSinceEntrySet         = 200  #N天时间止损
 
-classlocal.Price_SetSellY1          = 1     #多头ATR开始位置标志
+classlocal.Price_SetSellYratio1          = 1     #多头ATR开始位置标志
 classlocal.Price_SellY_Flag         = 0     #第一阶段止盈达到
 classlocal.TH_low                   = 5.9   #价格筛选下线单位元
 classlocal.TH_High                  = 100    #价格筛选上线单位元
@@ -549,7 +552,7 @@ def handlebar(ContextInfo):
             #预设止盈ATR
             Price_SellY1        = local_hold.loc[code,'Price_SellY1']
             #第一止盈位置 默认0.08
-            Price_SetSellY      = classlocal.Price_SetSellY
+            Price_SetSellYratio      = classlocal.Price_SetSellYratio
             #第二止盈位置
             Price_SellS1_t      = local_hold.loc[code,'Price_SellS1']
             Price_SellS1        = decimal_places_are_rounded(Price_SellS1_t,2)
@@ -574,7 +577,7 @@ def handlebar(ContextInfo):
             if local_hold.loc[code,'Price_SellY'] <= 0 or pd.isna(Price_SellY):
                 local_hold.loc[code,'Price_SellY_Flag'] = 0
                 #第一止盈位置
-                Price = Price_BuyK * (Price_SetSellY+1)
+                Price = Price_BuyK * (Price_SetSellYratio+1)
                 local_hold.loc[code,'Price_SellY']      = decimal_places_are_rounded(Price,2)
                 #Price_SellY1初始值
                 local_hold.loc[code,'Price_SellY1']     = local_hold.loc[code,'Price_SellY']
@@ -625,7 +628,7 @@ def handlebar(ContextInfo):
                     print('进入棘轮止盈持仓信息:\n',local_hold)
 
                 #第二阶段
-                #在盈利达到Price_SetSellY%时执行棘轮止损
+                #在盈利达到Price_SetSellYratio%时执行棘轮止损
                 ATR_Start_time  = local_hold.loc[code,'ATR_Start_time']
                 ATR_BuyK        = local_hold.loc[code,'ATR_BuyK']
                 check_list      = []
@@ -1775,7 +1778,7 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'Tradingday']  = td
 
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            = classlocal.Price_SetSellY
+                Profit_loss_ratio            = classlocal.Price_SetSellYBILI
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
                 G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,3)
                 G_df.loc[code,'Kindex']      = int(index)
@@ -1788,7 +1791,7 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellYBILI
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
                 G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Kindex']      = int(index)
@@ -1800,7 +1803,7 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellYBILI
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
                 G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Kindex']      = int(index)
@@ -1814,7 +1817,7 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellYBILI
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
                 G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Kindex']      = int(index)
@@ -1827,7 +1830,7 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellYBILI
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
                 G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Kindex']      = int(index)
@@ -1841,7 +1844,7 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellYBILI
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
                 G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Kindex']      = int(index)
