@@ -1787,11 +1787,11 @@ def model_process(ContextInfo,check_list):
             classlocal.volume    = volume
 
             #昨日13日收盘价均值
-            ma120                = np.mean(close[-classlocal.MA_middle_length-1:-1])
-            ma120_7              = np.mean(close[-(classlocal.MA_middle_length+7):-7])
+            MA_middle                = np.mean(close[-classlocal.MA_middle_length-1:-1])
+            MA_middle_7              = np.mean(close[-(classlocal.MA_middle_length+7):-7])
             #昨日34日收盘价均值
-            ma211                = np.mean(close[-classlocal.MA_long_length-1:-1])
-            ma211_7              = np.mean(close[-(classlocal.MA_long_length+7):-7])
+            MA_long                = np.mean(close[-classlocal.MA_long_length-1:-1])
+            MA_long_7              = np.mean(close[-(classlocal.MA_long_length+7):-7])
 
             
 
@@ -1800,7 +1800,7 @@ def model_process(ContextInfo,check_list):
             shenling             = 0
             TPDYX                = 0
             if classlocal.qxlck_en :
-                righthand            =  (ma211 > ma211_7)
+                righthand            =  (MA_long > MA_long_7)
                 if righthand != 0:
                     QXLCK_checkout()
                     qxlck                    = classlocal.qxlck
@@ -1814,10 +1814,10 @@ def model_process(ContextInfo,check_list):
                 shenling                     = classlocal.shenling
                 shenlingsp                   = lowmin
             if classlocal.TPDYX_en:
-                MA1_short                    = ma120
-                MA1_short7                   = ma120_7
-                MA2_long                     = ma211
-                MA2_long7                    = ma211_7
+                MA1_short                    = MA_middle
+                MA1_short7                   = MA_middle_7
+                MA2_long                     = MA_long
+                MA2_long7                    = MA_long_7
                 TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
                 TPDYX                        = classlocal.TPDYX
                 TPDYXsp                      = classlocal.TPDYXsp

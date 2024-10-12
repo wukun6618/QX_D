@@ -1720,15 +1720,15 @@ def model_process(ContextInfo,check_list):
             classlocal.volume    = volume
 
             #昨日13日收盘价均值
-            ma120                = np.mean(close[-classlocal.MAength1-1:-1])
-            ma120_7              = np.mean(close[-(classlocal.MAength1+7):-7])
+            MA_middle            = np.mean(close[-classlocal.MAength1-1:-1])
+            MA_middle_7          = np.mean(close[-(classlocal.MAength1+7):-7])
             #昨日34日收盘价均值
-            ma211                = np.mean(close[-classlocal.MAength2-1:-1])
-            ma211_7              = np.mean(close[-(classlocal.MAength2+7):-7])
+            MA_long              = np.mean(close[-classlocal.MAength2-1:-1])
+            MA_long_7            = np.mean(close[-(classlocal.MAength2+7):-7])
             #如果13日均线上穿34日均线，且昨日收盘价位于13日均线之上
             righthand            =  0
-            righthand =  (ma211 > ma211_7)
-            #righthand =  (ma120 > ma144) or((ma120 < ma144) and (close[-1] > ma120 ) and (ma120_7 < ma120))
+            righthand =  (MA_long > MA_long_7)
+            #righthand =  (MA_middle > ma144) or((MA_middle < ma144) and (close[-1] > MA_middle ) and (MA_middle_7 < MA_middle))
 
             qxlck                = 0
             diao                 = 0
@@ -1751,10 +1751,10 @@ def model_process(ContextInfo,check_list):
                 shenlingsp                   = lowmin
 
             if classlocal.TPDYX_en :
-                MA1_short                    = ma120
-                MA1_short7                    = ma120_7
-                MA2_long                     = ma211
-                MA2_long7                    = ma211_7
+                MA1_short                    = MA_middle
+                MA1_short7                    = MA_middle_7
+                MA2_long                     = MA_long
+                MA2_long7                    = MA_long_7
                 TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
                 #
                 TPDYX                      = classlocal.TPDYX
