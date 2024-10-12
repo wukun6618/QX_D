@@ -69,22 +69,24 @@ pd.set_option('display.max_rows', 5000)     #最多显示数据的行数
 pd.set_option('display.unicode.ambiguous_as_wide', True) # 中文字段对齐
 pd.set_option('display.unicode.east_asian_width', True)
 pd.set_option('display.float_format', lambda x: '%.3f' % x) # dataframe格式化输出
-list_data_values = []#[[0,0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
-ATR_LEN = 5
-SELL_RATIO = 3
-SELL_BASE_DIANSHU =0.02
+
+list_data_values                    = []#[[0,0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+ATR_LEN                             = 5
+YKB                                 = 3
+DEFAULT_NUMBER_OF_POINTS            = 0.02
+
 class b():
     pass
 classlocal = b()
 
-classlocal.printmoney_en            = 0
-classlocal.printlocalhold_en        = 0
+classlocal.printmoney_en            = 1
+classlocal.printlocalhold_en        = 1
 classlocal.sell_debug_inf_en        = 0
 classlocal.checklist_debug_en       = 0 #打印本地自选股行情
 classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
-classlocal.JLZY_debug_en            = 1 #棘轮止盈打印
+classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
 classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
@@ -148,24 +150,29 @@ classlocal.shenling                 = 0
 classlocal.shenlingsp               = 8888
 classlocal.sldf                     = 0.043  #神零下跌幅度
 classlocal.slsecondedf              = 0.005  #神零下跌幅度#0.008
-
-classlocal.Price_SetSellS           = SELL_BASE_DIANSHU  #默认五个点止损,无论如何都会在
-classlocal.Price_SetSellYBILI       = 3    #盈亏比设置为3
-classlocal.Price_SetSellYratio      = SELL_BASE_DIANSHU*3  #盈亏比设置为3
+################################################################################################
+#1.总涨幅止盈
+classlocal.Price_SellYA_Ratio       = 2    #涨到个点止盈,手动买入时生效
+#2.时间止盈
+classlocal.BarSinceEntrySet         = 200  #N天时间止损
+#3.盈亏比预设
+classlocal.Price_SetSellY_YKB       = YKB    #盈亏比设置为3
+classlocal.Price_SetSellS           = DEFAULT_NUMBER_OF_POINTS  #默认止损,无论如何都会在
+classlocal.Price_SetSellYratio      = DEFAULT_NUMBER_OF_POINTS*YKB  #
+#3.5 盈亏比止盈触发后进行棘轮止盈
 classlocal.Price_SellS1_ATRratio    = 15    #ATR棘轮止损默认
 classlocal.Price_SellY1_ATRratio    = 0.01   #ATR 止盈 默认比例 越大约灵敏大
 classlocal.TC_ATRratio              = 1.0
 
-classlocal.Price_SellY1_ratio       = 0.06   #涨到个点止盈,手动买入时生效
+
 classlocal.Price_SellY              = 0     #棘轮止盈利开始价格
 classlocal.Price_SellY1             = 0     #棘轮止盈止盈价格,根据ATR值相关
-classlocal.BarSinceEntrySet         = 200  #N天时间止损
 
-classlocal.Price_SetSellY1          = 1     #多头ATR开始位置标志
+#classlocal.Price_SetSellY1          = 1     #
 classlocal.Price_SellY_Flag         = 0     #第一阶段止盈达到
 classlocal.TH_low                   = 5.9   #价格筛选下线单位元
 classlocal.TH_High                  = 100    #价格筛选上线单位元
-
+################################################################################################
 
 classlocal.Kindex                   = 0     # 当前K线索引
 classlocal.Kindex_time              = 0     # 当前K线对应的时间
@@ -610,10 +617,11 @@ def handlebar(ContextInfo):
             length1             = classlocal.modul_length+5
             period_t            = classlocal.Period_Type
             code_list           = [code]
-            print('codemain:',code)
-            print('period_t:',period_t)
-            print('endtime:',endtime)
-            print('length1:',length1)
+            if(classlocal.ZXCS_debug_en):
+                print('codemain:',code)
+                print('period_t:',period_t)
+                print('endtime:',endtime)
+                print('length1:',length1)
 
             h_data_init         = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
                                 code_list,period = period_t,end_time = endtime,count = length1,\
@@ -804,7 +812,7 @@ def handlebar(ContextInfo):
                     #print(code,'时间止损')
                     Sell_list.append(code)
             #翻倍止盈
-            if Last_Price > ((classlocal.Price_SellY1_ratio +1)* Price_BuyK) and Price_BuyK and BarSinceEntry:
+            if Last_Price > ((classlocal.Price_SellYA_Ratio +1)* Price_BuyK) and Price_BuyK and BarSinceEntry:
                 if code not in Sell_list:
                     #放入卖出列表
                     #空间止损
@@ -1821,7 +1829,7 @@ def model_process(ContextInfo,check_list):
             #timecycle = ' 日K '
             ART_length                       = classlocal.ATR_open_Length
             if qxlck == 1:
-                strqxlx                      = ":"+"七星一型"
+                str_modelname                      = ":"+"七星一型"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(qxlcksp,2)
                 buy_atr                      = calculate_ATR(high,low,close,ART_length)
 
@@ -1829,67 +1837,74 @@ def model_process(ContextInfo,check_list):
                 G_df.loc[code,'Tradingday']  = td
 
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            = classlocal.Price_SetSellY
+                Profit_loss_ratio            = classlocal.Price_SetSellY_YKB
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
-                G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,3)
+                takprofit                    = decimal_places_are_rounded(zf_zy,3)
+                G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
                 #主图档当前K线索引
-                send(td,code,str(decimal_places_are_rounded(qxlcksp,2)),strqxlx)
+
+                send_model_open(td,code,classlocal.Period_Type,str_modelname,takprofit)
+                #send(td,code,str(decimal_places_are_rounded(qxlcksp,2)),str_modelname)
             if qxlck == 2:
-                strqxlx                      = ":"+"七星二型"
+                str_modelname                = ":"+"七星二型"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(qxlcksp,2)
                 buy_atr                      = calculate_ATR(high,low,close,ART_length)
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellY_YKB
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
-                G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
+                takprofit                    = decimal_places_are_rounded(zf_zy,2)
+                G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
-                send(td,code,str(decimal_places_are_rounded(qxlcksp,2)),strqxlx)
+                send_model_open(td,code,classlocal.Period_Type,str_modelname,takprofit)
+                #send(td,code,str(decimal_places_are_rounded(qxlcksp,2)),str_modelname)
             if diao:
-                strdiao                      = ":"+"一箭双雕"
+                str_modelname                = ":"+"一箭双雕"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(diaosp,2)
                 buy_atr                      = calculate_ATR(high,low,close,ART_length)
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellY_YKB
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
-                G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
+                takprofit                    = decimal_places_are_rounded(zf_zy,2)
+                G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
                 #print(f'G_df\n,{G_df}')
                 #print('一箭双雕',code)
-                send(td,code,str(decimal_places_are_rounded(diaosp,2)),strdiao)
+                send_model_open(td,code,classlocal.Period_Type,str_modelname,takprofit)
+                #send(td,code,str(decimal_places_are_rounded(diaosp,2)),strdiao)
             if shenling:
-                strshenling                  = ":"+"神零"
+                str_modelname                = ":"+"神零"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(shenlingsp,2)
                 buy_atr                      = calculate_ATR(high,low,close,ART_length)
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellY
+                Profit_loss_ratio            =  classlocal.Price_SetSellY_YKB
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
-                G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
+                takprofit                    = decimal_places_are_rounded(zf_zy,2)
+                G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
-                send(td,code,str(decimal_places_are_rounded(shenlingsp,2)),strshenling)
+                send_model_open(td,code,classlocal.Period_Type,str_modelname,takprofit)
+                #send(td,code,str(decimal_places_are_rounded(shenlingsp,2)),strshenling)
                 #print(f'G_df\n,{G_df}')
+
             if TPDYX:
-                strTPDYX                   = ":"+"神龙"
+                str_modelname                     = ":"+"大阳线突破"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(TPDYXsp,2)
                 buy_atr                      = calculate_ATR(high,low,close,ART_length)
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
-                Profit_loss_ratio            =  classlocal.Price_SetSellYBILI
+                Profit_loss_ratio            =  classlocal.Price_SetSellY_YKB
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
-                G_df.loc[code,'Price_SellY'] = decimal_places_are_rounded(zf_zy,2)
+                takprofit                    = decimal_places_are_rounded(zf_zy,2)
+                G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
-                #print(f'G_df\n,{G_df}')
-                #print('一箭双雕',code)
-                send(td,code,str(decimal_places_are_rounded(TPDYXsp,2)),strTPDYX)
-    #if not G_df.empty:
-    #    print(f'G_df,{G_df}')
+                send_model_open(td,code,classlocal.Period_Type,str_modelname,takprofit)
     return G_df
 
 ###################################start###########################################################################
@@ -2036,6 +2051,7 @@ def send(last_time,daima,timecycle,leixin):
     daima       = ' stop'+' ' + daima
     list_qxlx   = [last_time,leixin,timecycle,daima]
     msg         = ''.join(list_qxlx) #daima + lexing
+
     msgContent  = {
         "text": msg,
     }
@@ -2051,6 +2067,144 @@ def send(last_time,daima,timecycle,leixin):
     response = requests.request("POST", url, params = params, headers = headers, data = payload)
     #print(response.headers['X-Tt-Logid']) # for debug or oncall
     #print(response.content) # Print Response
+###################################start###########################################################################
+#以卡片形式发送
+###################################start###########################################################################
+def send_model_open(code,kindextime,type,stop,takprofit):
+    payload = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {"wide_screen_mode": True},
+            "header": {"template": "red", "title": {"tag": "plain_text", "content": "type{}".format(type),}},
+            "elements": [
+                {
+                    "tag": "column_set",
+                    "flex_mode": "none",
+                    "background_style": "default",
+                    "columns": [
+                        {
+                            "tag": "column",
+                            "width": "weighted",
+                            "weight": 1,
+                            "vertical_align": "top",
+                            "elements": [
+                                {
+                                    "tag": "column_set",
+                                    "flex_mode": "none",
+                                    "background_style": "grey",
+                                    "columns": [
+                                        {
+                                            "tag": "column",
+                                            "width": "weighted",
+                                            "weight": 1,
+                                            "vertical_align": "top",
+                                            "elements": [
+                                                {
+                                                    "tag": "markdown",
+                                                    "content": "code:\n{}".format(code),
+                                                    "text_align": "center"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "column",
+                            "width": "weighted",
+                            "weight": 1,
+                            "vertical_align": "top",
+                            "elements": [
+                                {
+                                    "tag": "column_set",
+                                    "flex_mode": "none",
+                                    "background_style": "grey",
+                                    "columns": [
+                                        {
+                                            "tag": "column",
+                                            "width": "weighted",
+                                            "weight": 1,
+                                            "vertical_align": "top",
+                                            "elements": [
+                                                {
+                                                    "tag": "markdown",
+                                                    "content": "kindextime：\n{}".format(kindextime),
+                                                    "text_align": "center"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "column",
+                            "width": "weighted",
+                            "weight": 1,
+                            "vertical_align": "top",
+                            "elements": [
+                                {
+                                    "tag": "column_set",
+                                    "flex_mode": "none",
+                                    "background_style": "grey",
+                                    "columns": [
+                                        {
+                                            "tag": "column",
+                                            "width": "weighted",
+                                            "weight": 1,
+                                            "vertical_align": "top",
+                                            "elements": [
+                                                {
+                                                    "tag": "markdown",
+                                                    "content": "stop：\n{}".format(stop),
+                                                    "text_align": "center"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "column",
+                            "width": "weighted",
+                            "weight": 1,
+                            "vertical_align": "top",
+                            "elements": [
+                                {
+                                    "tag": "column_set",
+                                    "flex_mode": "none",
+                                    "background_style": "grey",
+                                    "columns": [
+                                        {
+                                            "tag": "column",
+                                            "width": "weighted",
+                                            "weight": 1,
+                                            "vertical_align": "top",
+                                            "elements": [
+                                                {
+                                                    "tag": "markdown",
+                                                    "content": "takprofit：\n{}".format(takprofit),
+                                                    "text_align": "center"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },     
+                    ]
+                }
+            ]
+        }
+    }  # 替换为实际的JSON消息
+
+    url         = "https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e"
+    headers = {'Content-Type': 'application/json'}
+    
+    respoonse = requests.post(url,payload,headers)
+
 ###################################start###########################################################################
 #
 ###################################start###########################################################################
