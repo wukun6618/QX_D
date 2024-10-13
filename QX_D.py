@@ -321,11 +321,11 @@ def handlebar(ContextInfo):
     global handlebarcnt
     global Buy_df
     global model_df_level2
-    '''
+
     if classlocal.huicedebug_en != 1:
         if not ContextInfo.is_last_bar():
             return
-    '''
+
     local_hold                  = read_local_hold_data(classlocal.stockPath_hold,False)
     if classlocal.ISfirst :
         classlocal.ISfirst      = False
