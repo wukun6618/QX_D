@@ -207,7 +207,7 @@ def init(ContextInfo):
     if classlocal.huicedebug_en :
         account             = 'test'
     else :
-        account             = '510000000223'
+        account             = '510000165852'
     accountType             = 'FUTURE'
     eastmoey_stockPath      = 'C:\\eastmoney\\swc8\\config\\User\\9489316496536486\\StockwayStock.ini'
     stockPath_sell          = 'C:\\new_tdx\\T0002\\blocknew\\QX.blk'
@@ -974,7 +974,7 @@ def open_long_position(model_df_level2,ContextInfo):
                 orderType       = 1101                   #单股、单账号、普通、股/手方式下单
                 accountid       = ContextInfo.accID      #账号
                 orderCode       = code                   #代码
-                prType          = 14                     #对手价（对方盘口一档价）
+                prType          = 5                     #对手价（对方盘口一档价）
                 price           = buy_price              #开仓价格#实际无效
                 volume          = 1                      #availableStock         #买入1手数
                 strategyName    = remark                 #"七星开多"#remark                 #策略名称
@@ -995,7 +995,9 @@ def open_long_position(model_df_level2,ContextInfo):
                         print(f'买入：{orderCode,volume}')
                         # 用对手价 1 手买入开仓
                         #buy_open(orderCode, volume, 'COMPETE', ContextInfo, accountID)
-                        passorder(opType, orderType, accountid, orderCode, prType, price, volume,strategyName,quickTrade, userOrderId, ContextInfo)
+                        #passorder(opType, orderType, accountid, orderCode, prType, price, volume,strategyName,quickTrade, userOrderId, ContextInfo)
+                        #passorder(0,     1101,     'test',     target,      5,     -1,  10, ContextInfo)
+                        passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
                         #对手价、金额下单
                         classlocal.buy_code_count             += 1
                         #print(remark)
@@ -1048,11 +1050,11 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
             availableStock  = g_query.get_available_holding(code)
             availableStock  = int(availableStock)
 
-            opType          = 1                      # 1：平左多
+            opType          = 7                      # 1：平左多 7：平多,优先平昨
             orderType       = 1101                   #单股、单账号、普通、股/手方式下单
             accountid       = ContextInfo.accID      #账号
             orderCode       = code                   #代码
-            prType          = 14                     #对手价（对方盘口一档价）
+            prType          = 5                      #对手价（对方盘口一档价）
             volume          = availableStock         #买入手数
             strategyName    = "七星平仓"              #策略名称
             quickTrade      = 1                      #立即触发下单,1：历史触发在实盘不会执行，2：历史触发在实盘会执行
@@ -1078,7 +1080,15 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 #msg    = f"投资备注_{stk_code}_资金账号:{ContextInfo.accID}_卖出金额:{sell_price*availableStock}_{classlocal.Kindex_time}"
                 #          卖出   按手数买入  账号   代码  卖5价  价格     可用手数
                 #passorder(opType, orderType, accountid, orderCode, prType, price, volume,strategyName,quickTrade, userOrderId, ContextInfo)
-                sell_close_ydayfirst(orderCode, volume, sell_style, ContextInfo, '110476')
+                #sell_close_ydayfirst(orderCode, volume, sell_style, ContextInfo, '110476')
+                '''
+                # 单股单账号期货最新价买入 10 手
+                passorder(0, 1101, 'test', target, 5, -1, 10, ContextInfo)
+                # 单股单账号期货指定价买入 10 手
+                passorder(0, 1101, 'test', target, 11, 3000, 10, ContextInfo)
+                '''
+                #passorder(0,     1101,     'test',     target,      5,     -1,  10, ContextInfo)
+                passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
 
                 print('PositionProfit:\n',local_hold.loc[code,'PositionProfit'])
                 if local_hold.loc[code,'PositionProfit']>0:
@@ -1570,7 +1580,7 @@ def model_process(ContextInfo,check_list):
         if  rows< classlocal.MA_long_length + 9:
             print(f'code:{code},行数:{rows}')
             print(f'计算均线数据长度不够结束本次筛选\n')
-            break
+            continue
 
         if((closemin > 0) and (openmin > 0) and (lowmin > 0) and highmax):
             #print('G_df.loc[code,'Price_SellS']:',G_df.loc[code,'Price_SellS'])
