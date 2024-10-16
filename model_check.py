@@ -37,12 +37,16 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
-classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
+classlocal.ZXCS_debug_en            = 1 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
+
 classlocal.RED_TPDYX_debug_en           = 0 #debug信息打印
 classlocal.RED_TPDYX_STOP_DEBUG         = 0 #行情止损打印
+
+classlocal.GREEN_TPDYX_debug_en           = 0 #debug信息打印
+classlocal.GREEN_TPDYX_STOP_DEBUG         = 0 #行情止损打印
 classlocal.check_list               = ['SA00.ZF']
 classlocal.check_list_debug_en      = 0 #自定义行情品种
 
@@ -151,6 +155,25 @@ classlocal.eastmoney_user_buy_list  = ''
 classlocal.eastmoney_zx_name_list   = ''
 classlocal.stockPath_hold           = ''
 classlocal.user_buy_list            = ''
+
+classlocal.tradestatus      = ''
+classlocal.trade_direction  = 'kong' #duo #kong
+classlocal.code             = 'SA00.SF'
+classlocal.kindextime       = '20241016093000'
+classlocal.timetype         = '15m'
+classlocal.tradetype        = 'open'  #open #close
+classlocal.tradedata        = ''
+classlocal.stop             = 0
+classlocal.takprofit        = 0
+
+classlocal.last_price       = 0
+classlocal.profit           = 0
+classlocal.middleprice      = 0
+classlocal.tradestatus      = ''
+classlocal.modle            = ''
+classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/763bec44-0f8e-447b-8341-2e567d7fd6a8'#'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
+classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/763bec44-0f8e-447b-8341-2e567d7fd6a8'#'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
+
 # -------------------------------------------#
 # -------------------------------------------#
 # 判断类型
@@ -180,6 +203,11 @@ def init(ContextInfo):
     global classlocal
 
     global deleted_rows
+
+    if classlocal.huicedebug_en != 1:
+        if not ContextInfo.is_last_bar():
+            return
+
     #current_hold = local_hold_data_frame_init()
     if classlocal.huicedebug_en :
         account             = 'test'
@@ -201,7 +229,8 @@ def init(ContextInfo):
     eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                               'FT8','FT9','FTA','FTB','FTC']
     '''
-    eastmoney_zx_name_listt = ['FT1']# ['FUTURE']
+    eastmoney_zx_name_listt = ['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
+                              'FT8','FT9']# ['FUTURE']
     #当前K线的对应的下标从0开始
     #---------------------------------------------------------------------------
     # 账号为模型交易界面选择账号
@@ -237,7 +266,7 @@ def init(ContextInfo):
     #classlocal.eastmoney_zx_name     = eastmoney_zx_name          #自选分组的名字
     classlocal.eastmoney_zx_name_list = eastmoney_zx_name_listt   #自选分组名字
     classlocal.eastmoney_user_buy_list = eastmoney_user_buy_list   #自选分组名字
-    GlobalVariiable(ContextInfo)
+
     #从本地读取数据
     local_hold      = read_local_hold_data(classlocal.stockPath_hold,False)
     Tradehistory    = read_local_hold_data(classlocal.stockPath_recordh,False)
@@ -329,17 +358,14 @@ def handlebar(ContextInfo):
         # 
         if classlocal.model_df_level2_debug_en and not model_df_level2.empty:
             print(f'model_df_level2—start:\n{model_df_level2}')
-        if ContextInfo.accountType != 'FUTURE':
-            if not model_df_level2.empty:
-                for code in model_df_level2.index:
-                    if ContextInfo.is_suspended_stock(code):
-                        model_df_level2.drop(code,inplace=True)
+        if not model_df_level2.empty:
+            for code in model_df_level2.index:
+                if ContextInfo.is_suspended_stock(code):
+                    model_df_level2.drop(code,inplace=True)
         if classlocal.model_df_level2_debug_en and not model_df_level2.empty:
             print(f'模型最终选出列表:\n{model_df_level2}')
         #--------------------------------------------------------------------------
     handlebarcnt +=1
-    if(classlocal.printlocalhold_en and not local_hold.empty):
-        print(f'买卖前持仓信息:\n{local_hold}')
 ###################################start###########################################################################
 # 获取资金账号信息#
 # 从服务器获取持仓信息
@@ -376,7 +402,7 @@ def QXLCK_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     righthand       = 0
     righthand       =  (MA1_short > MA2_long) and (MA2_long > MA2_long7) and \
                        (lowmin   < MA1_short) and (highmax > MA1_short)
-
+    righthand       = 1
     if righthand:
         yixing = (closes_opens[-1]>0) and (closes_opens[-2]<0) and (closes_opens[-3]>0) and \
                  (closes_opens[-4]>0) and (closes_opens[-5]<0) and (closes_opens[-6]<0) and (closes_opens[-7])<0
@@ -806,12 +832,12 @@ def model_process(ContextInfo,check_list):
                 middlepricet                = (high[-1] - low[-1])/2 + low[-1]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
-                classlocal.tradestatus      = 'success'
+                classlocal.tradestatus      = ''
                 classlocal.modle            = str_modelname
                 send_message_to_feishu(classlocal)
 
             if qxlck == 1:
-                str_modelname                      = ":"+"七星一型"
+                str_modelname                      = '七星一型'
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(qxlcksp,2)
 
                 G_df.loc[code,'Tradingday']  = td
@@ -837,8 +863,8 @@ def model_process(ContextInfo,check_list):
                 middlepricet                = (high[-1] - low[-1])/2 + low[-1]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
-                classlocal.tradestatus      = 'success'
-                classlocal.modle            = 'GREEN_TPDYX'
+                classlocal.tradestatus      = ''
+                classlocal.modle            = str_modelname
                 send_message_to_feishu(classlocal)
 
             if qxlck == 2:
@@ -868,7 +894,7 @@ def model_process(ContextInfo,check_list):
                 middlepricet                = (high[-1] - low[-1])/2 + low[-1]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
-                classlocal.tradestatus      = 'success'
+                classlocal.tradestatus      = ''
                 classlocal.modle            = str_modelname
                 send_message_to_feishu(classlocal)
 
@@ -900,12 +926,12 @@ def model_process(ContextInfo,check_list):
                 middlepricet                = (high[-1] - low[-1])/2 + low[-1]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
-                classlocal.tradestatus      = 'success'
+                classlocal.tradestatus      = ''
                 classlocal.modle            = str_modelname
                 send_message_to_feishu(classlocal)
                 
             if RED_TPDYX:
-                str_modelname                     = "大阳线突破"
+                str_modelname                 = "大阳线突破"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(RED_TPDYXsp,2)
 
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
@@ -931,7 +957,7 @@ def model_process(ContextInfo,check_list):
                 middlepricet                = (high[-1] - low[-1])/2 + low[-1]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
-                classlocal.tradestatus      = 'success'
+                classlocal.tradestatus      = ''
                 classlocal.modle            = str_modelname
                 send_message_to_feishu(classlocal)
     return G_df
@@ -1065,6 +1091,123 @@ def dict_into_dataframe(data_dict,cloums):
     return data_df
 
 
+
+###################################start###########################################################################
+#飞书发送函数
+#开仓和平仓输入参数不同
+###################################start###########################################################################
+from datetime import datetime
+
+def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice):
+    if trade_direction == 'duo':
+        Head_color = 'Purple'
+    else:
+        Head_color = 'Orange'
+    # 构建卡片消息
+    card_message = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {
+                "wide_screen_mode": False },
+                "header": {"template":     "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
+
+            "elements": [
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"modle         :{}".format(modle),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"lastprice      :{}".format(lastprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"middleprice :{}".format(middleprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"stop            :{}".format(stop),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"takprofit       :{}".format(takprofit),
+                    }
+                }
+
+            ]
+        }
+    }
+    return card_message
+
+
+def close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit):
+    if profit >= 0 :
+        Head_color = 'red'
+    else :
+        Head_color = 'green'
+    # 构建卡片消息
+    card_message = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {
+                "wide_screen_mode": False },
+                "header": {"template":     "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
+            "elements": [
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"modle      :{}".format(modle),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"lastprice   :{}".format(lastprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"Stop        :{}".format(stop),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"takprofit   :{}".format(takprofit),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"profit       :{}".format(profit),
+                    }
+                }
+
+            ]
+        }
+    }
+    return card_message
+
 # 向飞书机器人发送卡片消息和天气
 def send_message_to_feishu(classlocal):
     # 设置请求头,指定消息格式为JSON
@@ -1124,10 +1267,15 @@ def send_message_to_feishu(classlocal):
             url1             = classlocal.URLclose
 
     headers1                = {'Content-Type': 'application/json'}
-    response                = requests.post( url = url1, json = payload, headers = headers1)  # 发送POST请求
-    if response.status_code == 200:  # 判断返回状态码是否为200(请求成功)
-        print('发送成功')
-    else:
-        print('发送失败')
+    try:
+        response                = requests.post( url = url1, json = payload, headers = headers1)  # 发送POST请求
+    
+        if response.status_code == 200:  # 判断返回状态码是否为200(请求成功)
+            response.raise_for_status()  # 如果响应状态码不是200，主动抛出异常
+            #print("消息发送成功：", response.text)
+        else:
+            print('发送失败')
+    except requests.exceptions.RequestException as e:
+        print("发送失败：", e)
 
-send_message_to_feishu(classlocal)
+

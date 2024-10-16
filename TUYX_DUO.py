@@ -188,7 +188,7 @@ classlocal.takprofit        = 0
 classlocal.last_price       = 0
 classlocal.profit           = 0
 classlocal.middleprice      = 0
-classlocal.tradestatus      = 'success'
+classlocal.tradestatus      = ''
 classlocal.modle            = ''
 classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
 classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
@@ -1126,7 +1126,7 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 classlocal.last_price       = price
                 classlocal.profit           = local_hold.loc[code,'PositionProfit']
                 classlocal.middleprice      = 0
-                classlocal.tradestatus      = 'success'
+                classlocal.tradestatus      = ''
                 classlocal.modle            = 'RED_TPDYX'
                 send_message_to_feishu(classlocal)
                 local_hold.loc[code,'nCanUseVolume'] = 0
@@ -1679,7 +1679,7 @@ def model_process(ContextInfo,check_list):
                 middlepricet                = (high[-1] - low[-1])/2 + last_price
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
-                classlocal.tradestatus      = 'success'
+                classlocal.tradestatus      = ''
                 classlocal.modle            = 'RED_TPDYX'
                 send_message_to_feishu(classlocal)
     return G_df
@@ -2097,7 +2097,7 @@ def send_message_to_feishu(classlocal):
     
         if response.status_code == 200:  # 判断返回状态码是否为200(请求成功)
             response.raise_for_status()  # 如果响应状态码不是200，主动抛出异常
-            print("消息发送成功：", response.text)
+            #print("消息发送成功：", response.text)
         else:
             print('发送失败')
     except requests.exceptions.RequestException as e:

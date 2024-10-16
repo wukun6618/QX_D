@@ -17,7 +17,7 @@ classlocal.takprofit        = 565656
 classlocal.last_price       = 555
 classlocal.profit           = -99
 classlocal.middleprice      = 555
-classlocal.tradestatus      = 'success'
+classlocal.tradestatus      = ''
 classlocal.modle            = 'TPDYX'
 classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
 classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
@@ -195,7 +195,7 @@ def send_message_to_feishu(classlocal):
     
         if response.status_code == 200:  # 判断返回状态码是否为200(请求成功)
             response.raise_for_status()  # 如果响应状态码不是200，主动抛出异常
-            print("消息发送成功：", response.text)
+            #print("消息发送成功：", response.text)
         else:
             print('发送失败')
     except requests.exceptions.RequestException as e:
