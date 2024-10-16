@@ -5,7 +5,7 @@ class c():
     pass
 classlocal = c()
 
-classlocal.trade_direction  = 'duo' #duo #kong
+classlocal.trade_direction  = 'kong' #duo #kong
 classlocal.code             = 'SA00.SF'
 classlocal.kindextime       = '20241014135000'
 classlocal.timetype         = '15m'
@@ -21,363 +21,116 @@ classlocal.tradestatus      = 'success'
 classlocal.modle            = 'TPDYX'
 classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
 classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
-
 def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice):
-
     if trade_direction == 'duo':
         Head_color = 'Purple'
     else:
         Head_color = 'Orange'
-    print(f'Head_color:{Head_color}')
-    print(f'tradetype:{trade_direction}')
-    payload = {
+    # 构建卡片消息
+    card_message = {
         "msg_type": "interactive",
         "card": {
-            "config": {"wide_screen_mode": True},
-            "header": {"template":  "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
+            "config": {
+                "wide_screen_mode": False },
+                "header": {"template":     "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
+
             "elements": [
                 {
-                    "tag": "column_set",
-                    "flex_mode": "none",
-                    "background_style": "default",
-                    "columns": [
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "modle:\n{}".format(modle),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "lastprice\n{}".format(lastprice),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "middleprice\n{}".format(middleprice),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "stop：\n{}".format(stop),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "takprofit：\n{}".format(takprofit),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                    ]
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"modle         :{}".format(modle),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"lastprice      :{}".format(lastprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"middleprice :{}".format(middleprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"stop            :{}".format(stop),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"takprofit      :{}".format(takprofit),
+                    }
                 }
+
             ]
         }
-    }  # 替换为实际的JSON消息
-    return payload
+    }
+    return card_message
+
 
 def close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit):
     if profit >= 0 :
         Head_color = 'red'
     else :
         Head_color = 'green'
-    payload = {
+    # 构建卡片消息
+    card_message = {
         "msg_type": "interactive",
         "card": {
-            "config": {"wide_screen_mode": True},
-            "header": {"template":  "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
+            "config": {
+                "wide_screen_mode": False },
+                "header": {"template":     "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
             "elements": [
                 {
-                    "tag": "column_set",
-                    "flex_mode": "none",
-                    "background_style": "default",
-                    "columns": [
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "modle:\n{}".format(modle),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "type\n{}".format(type),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "Stop：\n{}".format(stop),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "takprofit：\n{}".format(takprofit),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "lastprice\n{}".format(lastprice),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "profit\n{}".format(profit),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                    ]
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"modle      :{}".format(modle),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"lastprice   :{}".format(lastprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"Stop        :{}".format(stop),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"takprofit   :{}".format(takprofit),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"profit       :{}".format(profit),
+                    }
                 }
+
             ]
         }
-    }  # 替换为实际的JSON消息
-    return payload
+    }
+    return card_message
+
 # 向飞书机器人发送卡片消息和天气
 def send_message_to_feishu(classlocal):
     # 设置请求头,指定消息格式为JSON
@@ -444,3 +197,7 @@ def send_message_to_feishu(classlocal):
         print('发送失败')
 
 send_message_to_feishu(classlocal)
+
+
+
+
