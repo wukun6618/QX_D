@@ -1016,7 +1016,9 @@ def open_long_position(model_df_level2,ContextInfo):
                         #buy_open(orderCode, volume, 'COMPETE', ContextInfo, accountID)
                         #passorder(opType, orderType, accountid, orderCode, prType, price, volume,strategyName,quickTrade, userOrderId, ContextInfo)
                         #passorder(0,     1101,     'test',     target,      5,     -1,  10, ContextInfo)
-                        passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
+                        #passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
+                        # 开多
+                        passorder(opType, orderType, accountid, orderCode,prType,0.0,1,2,ContextInfo)
                         #对手价、金额下单
                         classlocal.buy_code_count             += 1
                         #print(remark)
@@ -1069,7 +1071,7 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
             availableStock  = g_query.get_available_holding(code)
             availableStock  = int(availableStock)
 
-            opType          = 7                      # 1：平左多 7：平多,优先平昨
+            opType          = 1                      # 1：平左多 7：平多,优先平昨
             orderType       = 1101                   #单股、单账号、普通、股/手方式下单
             accountid       = ContextInfo.accID      #账号
             orderCode       = code                   #代码
@@ -1100,15 +1102,10 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 #          卖出   按手数买入  账号   代码  卖5价  价格     可用手数
                 #passorder(opType, orderType, accountid, orderCode, prType, price, volume,strategyName,quickTrade, userOrderId, ContextInfo)
                 #sell_close_ydayfirst(orderCode, volume, sell_style, ContextInfo, '110476')
-                '''
-                # 单股单账号期货最新价买入 10 手
-                passorder(0, 1101, 'test', target, 5, -1, 10, ContextInfo)
-                # 单股单账号期货指定价买入 10 手
-                passorder(0, 1101, 'test', target, 11, 3000, 10, ContextInfo)
-                '''
                 #passorder(0,     1101,     'test',     target,      5,     -1,  10, ContextInfo)
-                passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
-
+                #passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
+                # 平昨多
+                passorder(opType,  orderType, accountid, orderCode, prType,  0.0,  1, 2,   ContextInfo)
                 print('PositionProfit:\n',local_hold.loc[code,'PositionProfit'])
                 if local_hold.loc[code,'PositionProfit']>0:
                     ContextInfo.draw_text(1>0,classlocal.p-0.1*classlocal.p,"zy")
