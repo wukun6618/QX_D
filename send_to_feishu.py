@@ -67,7 +67,7 @@ def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,mi
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"takprofit      :{}".format(takprofit),
+                        "content":"takprofit       :{}".format(takprofit),
                     }
                 }
 
@@ -190,12 +190,17 @@ def send_message_to_feishu(classlocal):
             url1             = classlocal.URLclose
 
     headers1                = {'Content-Type': 'application/json'}
-    response                = requests.post( url = url1, json = payload, headers = headers1)  # 发送POST请求
-    if response.status_code == 200:  # 判断返回状态码是否为200(请求成功)
-        print('发送成功')
-    else:
-        print('发送失败')
-
+    try:
+        response                = requests.post( url = url1, json = payload, headers = headers1)  # 发送POST请求
+    
+        if response.status_code == 200:  # 判断返回状态码是否为200(请求成功)
+            response.raise_for_status()  # 如果响应状态码不是200，主动抛出异常
+            print("消息发送成功：", response.text)
+        else:
+            print('发送失败')
+    except requests.exceptions.RequestException as e:
+        print("发送失败：", e)
+        
 send_message_to_feishu(classlocal)
 
 

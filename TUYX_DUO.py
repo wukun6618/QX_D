@@ -174,6 +174,25 @@ classlocal.eastmoney_user_buy_list  = ''
 classlocal.eastmoney_zx_name_list   = ''
 classlocal.stockPath_hold           = ''
 classlocal.user_buy_list            = ''
+
+
+classlocal.trade_direction  = 'kong' #duo #kong
+classlocal.code             = 'SA00.SF'
+classlocal.kindextime       = '0'
+classlocal.timetype         = '15m'
+classlocal.tradetype        = 'open'  #open #close
+classlocal.tradedata        = ''
+classlocal.stop             = 0
+classlocal.takprofit        = 0
+
+classlocal.last_price       = 0
+classlocal.profit           = 0
+classlocal.middleprice      = 0
+classlocal.tradestatus      = 'success'
+classlocal.modle            = ''
+classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
+classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
+
 # -------------------------------------------#
 # -------------------------------------------#
 # 判断类型
@@ -610,7 +629,7 @@ def handlebar(ContextInfo):
             h_data_init         = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
                                 code_list,period = period_t,end_time = endtime,count = length1,\
                                 dividend_type='front', fill_data=True, subscribe = True)
-            
+            code_list           = []
             period_t        = classlocal.Period_Type
             if (period_t[-1] == 'm'):
                     #endtime_t = endtime[-6:-2]
@@ -1102,7 +1121,21 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 local_hold.drop(code,inplace=True)
                 Sell_list_t.remove(code)
                 print('remark:\n',remark)
+                classlocal.trade_direction  = 'duo' #duo #kong
+                classlocal.code             = code
+                classlocal.kindextime       = td
+                classlocal.timetype         = '15m'
+                classlocal.tradetype        = 'close'  #open #close
+                classlocal.tradedata        = ''
+                classlocal.stop             = 0
+                classlocal.takprofit        = 0
 
+                classlocal.last_price       = price
+                classlocal.profit           = local_hold.loc[code,'PositionProfit']
+                classlocal.middleprice      = 0
+                classlocal.tradestatus      = 'success'
+                classlocal.modle            = 'RED_TPDYX'
+                send_message_to_feishu(classlocal)
         print('结束卖出')
         print('local_hold_sell_end:\n',local_hold)
 ###################################start###########################################################################
@@ -1493,6 +1526,7 @@ def get_market_data_ex_modify(ContextInfo,check_list,period_t,endtime,length):
 def model_process(ContextInfo,check_list):
     endtime_t = '000000'
     list_data_values    = [0,0,0,0]
+
     list_clolums        = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
     dit1                = dict(zip(range(0,0), list_data_values))
     #转置矩阵
@@ -1621,7 +1655,6 @@ def model_process(ContextInfo,check_list):
             #---------------------------------------------------------------------------------------
             ART_length                       = classlocal.ATR_open_Length
             if TPDYX:
-                str_modelname                     = ":"+"大阳线突破"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(TPDYXsp,2)
                 buy_atr                      = calculate_ATR(high,low,close,ART_length)
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
@@ -1632,7 +1665,24 @@ def model_process(ContextInfo,check_list):
                 takprofit                    = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
-                send_model_open(td,code,classlocal.Period_Type,str_modelname,takprofit)
+
+                classlocal.trade_direction  = 'duo' #duo #kong
+                classlocal.code             = code
+                classlocal.kindextime       = endtime
+                classlocal.timetype         = '15m'
+                classlocal.tradetype        = 'open'  #open #close
+                classlocal.tradedata        = ''
+                classlocal.stop             = sp_price
+                classlocal.takprofit        = takprofit
+
+                classlocal.last_price       = last_price
+                classlocal.profit           = 0
+                middlepricet                = (high[-1] - low[-1])/2 + last_price
+                middleprice                 = decimal_places_are_rounded(middlepricet,3)
+                classlocal.middleprice      = middleprice
+                classlocal.tradestatus      = 'success'
+                classlocal.modle            = 'RED_TPDYX'
+                send_message_to_feishu(classlocal)
     return G_df
 ###################################start###########################################################################
 #calculate_ATR_from_buy_time:计算length 周期内的平均波幅
@@ -1766,170 +1816,6 @@ def read_local_hold_data(file_path,index1):
 
     data         = read_from_csv(file_path,index1)
     return data
-###################################start###########################################################################
-#
-###################################start###########################################################################
-def send(last_time,daima,timecycle,leixin):
-    #url = "https://open.fs.huaqin.com/open-apis/bot/v2/hook/0dbe6ac3-20b0-4fd3-aafb-775b342a3f10"
-    url         = "https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e"
-    #url = "https://open.feishu.cn/open-apis/bot/v2/hook/763bec44-0f8e-447b-8341-2e567d7fd6a8"
-    params      = {"receive_id_type":"chat_id"}
-    daima       = ' stop'+' ' + daima
-    list_qxlx   = [last_time,leixin,timecycle,daima]
-    msg         = ''.join(list_qxlx) #daima + lexing
-
-    msgContent  = {
-        "text": msg,
-    }
-    req = {
-        "msg_type": "text",
-        "content":json.dumps(msgContent)
-    }
-    payload = json.dumps(req)
-    headers = {
-        'Authorization': 'Bearer xxx', # your access token
-        'Content-Type': 'application/json'
-    }
-    response = requests.request("POST", url, params = params, headers = headers, data = payload)
-    #print(response.headers['X-Tt-Logid']) # for debug or oncall
-    #print(response.content) # Print Response
-###################################start###########################################################################
-#以卡片形式发送
-###################################start###########################################################################
-def send_model_open(code,kindextime,type,stop,takprofit):
-    payload = {
-        "msg_type": "interactive",
-        "card": {
-            "config": {"wide_screen_mode": True},
-            "header": {"template": "red", "title": {"tag": "plain_text", "content": "type{}".format(type),}},
-            "elements": [
-                {
-                    "tag": "column_set",
-                    "flex_mode": "none",
-                    "background_style": "default",
-                    "columns": [
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "code:\n{}".format(code),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "kindextime：\n{}".format(kindextime),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "stop：\n{}".format(stop),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "column",
-                            "width": "weighted",
-                            "weight": 1,
-                            "vertical_align": "top",
-                            "elements": [
-                                {
-                                    "tag": "column_set",
-                                    "flex_mode": "none",
-                                    "background_style": "grey",
-                                    "columns": [
-                                        {
-                                            "tag": "column",
-                                            "width": "weighted",
-                                            "weight": 1,
-                                            "vertical_align": "top",
-                                            "elements": [
-                                                {
-                                                    "tag": "markdown",
-                                                    "content": "takprofit：\n{}".format(takprofit),
-                                                    "text_align": "center"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },     
-                    ]
-                }
-            ]
-        }
-    }  # 替换为实际的JSON消息
-
-    url         = "https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e"
-    headers = {'Content-Type': 'application/json'}
-    
-    respoonse = requests.post(url,payload,headers)
 
 ###################################start###########################################################################
 #
@@ -2031,3 +1917,189 @@ def print_position_data(obj) :
     print('obj.m_strStockHolder',obj.m_strStockHolder)
     print('obj.m_strTradeID',obj.m_strTradeID)
     print('obj.m_xtTag',obj.m_xtTag)
+
+###################################start###########################################################################
+#飞书发送函数
+#开仓和平仓输入参数不同
+###################################start###########################################################################
+from datetime import datetime
+
+def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice):
+    if trade_direction == 'duo':
+        Head_color = 'Purple'
+    else:
+        Head_color = 'Orange'
+    # 构建卡片消息
+    card_message = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {
+                "wide_screen_mode": False },
+                "header": {"template":     "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
+
+            "elements": [
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"modle         :{}".format(modle),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"lastprice      :{}".format(lastprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"middleprice :{}".format(middleprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"stop            :{}".format(stop),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"takprofit       :{}".format(takprofit),
+                    }
+                }
+
+            ]
+        }
+    }
+    return card_message
+
+
+def close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit):
+    if profit >= 0 :
+        Head_color = 'red'
+    else :
+        Head_color = 'green'
+    # 构建卡片消息
+    card_message = {
+        "msg_type": "interactive",
+        "card": {
+            "config": {
+                "wide_screen_mode": False },
+                "header": {"template":     "{}".format(Head_color), "title": {"tag": "plain_text", "content": "{}".format(tradedata),}},
+            "elements": [
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"modle      :{}".format(modle),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"lastprice   :{}".format(lastprice),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"Stop        :{}".format(stop),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"takprofit   :{}".format(takprofit),
+                    }
+                },
+                {
+                    "tag": "div",
+                    "text": {
+                        "tag": "lark_md",
+                        "content":"profit       :{}".format(profit),
+                    }
+                }
+
+            ]
+        }
+    }
+    return card_message
+
+# 向飞书机器人发送卡片消息和天气
+def send_message_to_feishu(classlocal):
+    # 设置请求头,指定消息格式为JSON
+    # 飞书自定义机器人
+    '''
+    classlocal.trade_direction  = 'close' #duo #kong
+    classlocal.code             = 'SA00.SF'
+    classlocal.kindextime       = '20241014135000'
+    classlocal.timetype         = '15m'
+    classlocal.tradetype        = 'open'  #open #close
+    '''
+    tradestatus             = classlocal.tradestatus 
+    code                    = classlocal.code 
+    date_string             = classlocal.kindextime
+    date_object             = datetime.strptime(date_string, "%Y%m%d%H%M%S")
+    # 转换回字符串
+    new_date_string         = date_object.strftime("%Y-%m-%d %H:%M")
+    kindextime              = new_date_string
+    timetype                = classlocal.timetype
+    trade_direction         = classlocal.trade_direction # 
+    tradetype               = classlocal.tradetype       # 
+
+    stop                    = classlocal.stop
+    takprofit               = classlocal.takprofit
+    lastprice               = classlocal.last_price
+    profit                  = classlocal.profit
+    modle                   = classlocal.modle
+    #duo
+    if trade_direction == 'duo':
+        #open
+        if tradetype == 'open':
+            middleprice  = (lastprice - stop)/2 + stop
+            opentype     = 'open'
+            tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
+            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice)
+            url1             = classlocal.URLopen
+        #close
+        else:
+            opentype     = 'close'
+            tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
+            payload      = close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit)
+            url1             = classlocal.URLclose
+    #kong
+    else :
+                #open
+        if tradetype == 'open':
+            middleprice  = (stop - lastprice)/2 + lastprice
+            opentype     = 'open'
+            tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
+            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice)
+            url1             = classlocal.URLopen
+        #close
+        else:
+            opentype     = 'close'
+            tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
+            payload      = close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit)
+            url1             = classlocal.URLclose
+
+    headers1                = {'Content-Type': 'application/json'}
+    try:
+        response                = requests.post( url = url1, json = payload, headers = headers1)  # 发送POST请求
+    
+        if response.status_code == 200:  # 判断返回状态码是否为200(请求成功)
+            response.raise_for_status()  # 如果响应状态码不是200，主动抛出异常
+            print("消息发送成功：", response.text)
+        else:
+            print('发送失败')
+    except requests.exceptions.RequestException as e:
+        print("发送失败：", e)
