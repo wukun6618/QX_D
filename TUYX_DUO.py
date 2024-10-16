@@ -87,7 +87,7 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
@@ -243,7 +243,8 @@ def init(ContextInfo):
     eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                               'FT8','FT9','FTA','FTB','FTC']
     '''
-    eastmoney_zx_name_listt = ['FT1']# ['FUTURE']
+    eastmoney_zx_name_listt = ['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
+                              'FT8','FT9']# ['FUTURE']
     #当前K线的对应的下标从0开始
     #---------------------------------------------------------------------------
     # 账号为模型交易界面选择账号
@@ -1112,12 +1113,7 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 else:
                     ContextInfo.draw_text(1>0,classlocal.p+0.1*classlocal.p,"zs")
 
-                local_hold.loc[code,'nCanUseVolume'] = 0
-                local_hold.loc[code,'nVolume']       = 0
-                local_hold.loc[code,'dMarketValue']  = 0
-                local_hold.drop(code,inplace=True)
-                Sell_list_t.remove(code)
-                print('remark:\n',remark)
+
                 classlocal.trade_direction  = 'duo' #duo #kong
                 classlocal.code             = code
                 classlocal.kindextime       = td
@@ -1133,6 +1129,12 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 classlocal.tradestatus      = 'success'
                 classlocal.modle            = 'RED_TPDYX'
                 send_message_to_feishu(classlocal)
+                local_hold.loc[code,'nCanUseVolume'] = 0
+                local_hold.loc[code,'nVolume']       = 0
+                local_hold.loc[code,'dMarketValue']  = 0
+                local_hold.drop(code,inplace=True)
+                Sell_list_t.remove(code)
+                print('remark:\n',remark)
         print('结束卖出')
         print('local_hold_sell_end:\n',local_hold)
 ###################################start###########################################################################
@@ -2100,3 +2102,4 @@ def send_message_to_feishu(classlocal):
             print('发送失败')
     except requests.exceptions.RequestException as e:
         print("发送失败：", e)
+
