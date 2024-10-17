@@ -450,9 +450,9 @@ def RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     lowmin          = classlocal.lowmin                                                          #20日最低点
 
     DTCS            = (MA1_short > MA2_long) and (MA2_long > MA2_long7)                          #均线多头朝上
-    YXSC            = (close[-1] > MA2_long) and (open[-1] < MA2_long) and (close[-1]>open[-1])  #阳线上穿
-    JRZGD           = high[-1] >= highmax  #突破这天就是近日最高点
-    low_12          = min(low[-1],low[-2],low[-3])
+    YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and (close[-2]>open[-2])  #阳线上穿
+    JRZGD           = high[-2] >= highmax  #突破这天就是近日最高点
+    low_12          = min(low[-2],low[-3],low[-4])
 
 
     righthand       = DTCS and YXSC and JRZGD
@@ -461,7 +461,7 @@ def RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
             print("\nDTCS:",DTCS)
             print("\nYXSC:",YXSC)
             print("\nRZGD:",JRZGD)
-            print("\nhigh[-1]:",high[-1])
+            print("\nhigh[-2]:",high[-2])
             print("\nhigh:",high)
             print("\nhighmax:",highmax)
             print("\nlowmin:",lowmin)
@@ -488,11 +488,11 @@ def GREEN_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     highmax         = classlocal.high                                           #20日最高点
 
     DTCS            = (MA1_short < MA2_long) and (MA2_long < MA2_long7)         #均线多头朝下
-    YXSC            = (close[-1] < MA2_long) and (open[-1] > MA2_long ) and \
-                      (close[-1] < open[-1])                                    #阴线下穿破位
+    YXSC            = (close[-2] < MA2_long) and (open[-2] > MA2_long ) and \
+                      (close[-2] < open[-2])                                    #阴线下穿破位
 
-    JRZGD           = low[-1] <= lowmin                 #近日最低点
-    high_12         = max(high[-1],high[-2],high[-3])
+    JRZGD           = low[-2] <= lowmin                 #近日最低点
+    high_12         = max(high[-2],high[-3],high[-4])
 
     righthand       = DTCS and YXSC and JRZGD
     if classlocal.GREEN_TPDYX_debug_en:
@@ -500,7 +500,7 @@ def GREEN_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
             print("\nDTCS:",DTCS)
             print("\nYXSC:",YXSC)
             print("\nRZGD:",JRZGD)
-            print("\nhigh[-1]:",high[-1])
+            print("\nhigh[-2]:",high[-2])
             print("\nhigh:",high)
             print("\nhighmax:",highmax)
             print("\nlowmin:",lowmin)

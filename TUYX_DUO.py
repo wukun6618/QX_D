@@ -1000,7 +1000,8 @@ def open_long_position(model_df_level2,ContextInfo):
                 strategyName    = remark                 #"七星开多"#remark                 #策略名称
                 quickTrade      = 1                      #立即触发下单,1：历史触发在实盘不会执行，2：历史触发在实盘会执行
                 userOrderId     = "888888"
-
+                order_now       = 2                      # 0 等K线走完再下单 1或者2 立即下单 
+                                                         # 因为条件筛选中往前退了一根线，所以要立即下单
                 #signal_stock_money     = decimal_places_are_rounded(signal_stock_moneyt,2)
                 print(f'local_hold.index:{local_hold.index}')
                 print(f'code:{code},signal_stock_money:{signal_stock_money},availableStock:{availableStock},holded_num:{holded_num},totalStock:{totalStock},holding_num:{holding_num}')
@@ -1089,6 +1090,9 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
             sell_price      = decimal_places_are_rounded(sell_pricet,2)
             price           = sell_price
             sell_style      = 'BUY1'
+
+            order_now       = 2                      # 0 等K线走完再下单 1或者2 立即下单 
+                                                     # 止损碰到就要走，所以立即下单
             #print(f'\nopType:{opType},orderType:{orderType},account:{account},prType:{prType},sell_price:{sell_price},volume:{volume}')
             if availableStock == 0 :
                 availableStock = 0
@@ -1106,7 +1110,7 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 #passorder(0,     1101,     'test',     target,      5,     -1,  10, ContextInfo)
                 #passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
                 # 平昨多
-                passorder(opType,  orderType, accountid, orderCode, prType,  0.0,  1, 2,   ContextInfo)
+                passorder(opType,  orderType, accountid, orderCode, prType,  0.0,  volume, order_now,   ContextInfo)
                 print('PositionProfit:\n',local_hold.loc[code,'PositionProfit'])
                 if local_hold.loc[code,'PositionProfit']>0:
                     ContextInfo.draw_text(1>0,classlocal.p-0.1*classlocal.p,"zy")
@@ -1368,9 +1372,9 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     lowmin          = classlocal.lowmin                                                          #20日最低点
 
     DTCS            = (MA1_short > MA2_long) and (MA2_long > MA2_long7)                          #均线多头朝上
-    YXSC            = (close[-1] > MA2_long) and (open[-1] < MA2_long) and (close[-1]>open[-1])  #阳线上穿
-    JRZGD           = high[-1] >= highmax  #突破这天就是近日最高点
-    low_12          = min(low[-1],low[-2],low[-3])
+    YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and (close[-2]>open[-2])  #阳线上穿
+    JRZGD           = high[-2] >= highmax  #突破这天就是近日最高点
+    low_12          = min(low[-2],low[-3],low[-4])
 
 
     righthand       = DTCS and YXSC and JRZGD
@@ -1379,7 +1383,7 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
             print("\nDTCS:",DTCS)
             print("\nYXSC:",YXSC)
             print("\nRZGD:",JRZGD)
-            print("\nhigh[-1]:",high[-1])
+            print("\nhigh[-2]:",high[-2])
             print("\nhigh:",high)
             print("\nhighmax:",highmax)
             print("\nlowmin:",lowmin)
@@ -1393,10 +1397,7 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
         classlocal.TPDYX    = 0
         classlocal.TPDYXsp  = 8888
 ###################################start###########################################################################
-###################################start###########################################################################
-###################################start###########################################################################
-###################################start###########################################################################
-###################################start###########################################################################
+#
 ###################################start###########################################################################
 def compare_values_min(value1, value2):
     if value1 < value2:
