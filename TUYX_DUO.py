@@ -768,6 +768,8 @@ def handlebar(ContextInfo):
                             classlocal.sp_type = '棘轮止损'
                         elif classlocal.SellY1 and BarSinceEntry:
                             classlocal.sp_type = '棘轮止赢'
+                        else:
+                            classlocal.sp_type = '棘轮退出'
                         #print(f'classlocal.SellS1:{classlocal.SellS1}\nclasslocal.SellY1:{classlocal.SellY1}')
                         Sell_list.append(code)
                 if classlocal.JLZY_debug_en:
@@ -1374,7 +1376,8 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     lowmin          = classlocal.lowmin                                                          #20日最低点
 
     DTCS            = (MA1_short > MA2_long) and (MA2_long > MA2_long7)                          #均线多头朝上
-    YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and (close[-2]>open[-2])  #阳线上穿
+    YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and\
+					  (close[-2]>open[-2])  #阳线上穿
     JRZGD           = high[-2] >= highmax  #突破这天就是近日最高点
     low_12          = min(low[-2],low[-3],low[-4])
 
@@ -1418,7 +1421,7 @@ def compare_values_max(value1, value2):
 ###################################start###########################################################################
 def Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio):
     Price_SellY     = 0
-    Price_SellY_t   = last_price+(last_price - sp_price)*Profit_loss_ratio
+    Price_SellY_t   = last_price + (last_price - sp_price)*Profit_loss_ratio
     Price_SellY     = decimal_places_are_rounded(Price_SellY_t,4)
     if (classlocal.Trade_init_debug_en):
         print(f'last_price\n,{last_price}')
