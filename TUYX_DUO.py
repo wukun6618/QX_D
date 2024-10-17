@@ -159,6 +159,8 @@ classlocal.TH_High                  = 100    #价格筛选上线单位元
 ################################################################################################
 
 classlocal.Kindex                   = 0     # 当前K线索引
+classlocal.LastKindex               = 5     # 当前K线索引
+
 classlocal.Kindex_time              = 0     # 当前K线对应的时间
 classlocal.zf_lastK                 = 0     # 当前K线对应的涨幅
 classlocal.buy_list                 = []    #买入列表
@@ -1376,7 +1378,6 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     JRZGD           = high[-2] >= highmax  #突破这天就是近日最高点
     low_12          = min(low[-2],low[-3],low[-4])
 
-
     righthand       = DTCS and YXSC and JRZGD
     if classlocal.TPDYX_debug_en:
         if righthand:
@@ -1682,7 +1683,10 @@ def model_process(ContextInfo,check_list):
                 classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
                 classlocal.modle            = 'RED_TPDYX'
-                send_message_to_feishu(classlocal)
+                #防止多次发送，只发送一次
+                if (classlocal.LastKindex    != classlocal.Kindex):
+                    send_message_to_feishu(classlocal)
+                    classlocal.LastKindex    == classlocal.Kindex
     return G_df
 ###################################start###########################################################################
 #calculate_ATR_from_buy_time:计算length 周期内的平均波幅
