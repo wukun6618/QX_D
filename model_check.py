@@ -526,34 +526,34 @@ def YJSD_checkout():
     #获取个股昨日收盘价
     lastprice = close[-1]
     #昨日13日收盘价均值
-    ma13      = np.mean(close[-classlocal.MAength1-1:-1])
+    ma13      = np.mean(close[-classlocal.MAength1-1:-2])
     #昨日34日收盘价均值
-    ma34      = np.mean(close[-classlocal.MAength2-1:-1])
+    ma34      = np.mean(close[-classlocal.MAength2-1:-2])
     #如果13日均线上穿34日均线，且昨日收盘价位于13日均线之上
-    righthand =  (lastprice > ma13) and (ma13 > ma34) and (close[-1] > open[-1])
+    righthand =  (lastprice > ma13) and (ma13 > ma34) and (close[-2] > open[-2])
 
     if (righthand):
 
         #最高到最低的跌幅
-        FIRST_YANG    =   (close[-1] > open[-1])
-        SENCOD_YIN    =   (close[-2] <= open[-2])
-        THIRD_YIN     =   (close[-3] <= open[-3])
-        FOURTH_YANG   =  (close[-4] > open[-4])
+        FIRST_YANG    =   (close[-2] > open[-2])
+        SENCOD_YIN    =   (close[-3] <= open[-3])
+        THIRD_YIN     =   (close[-4] <= open[-4])
+        FOURTH_YANG   =  (close[-5] > open[-5])
 
-        FIRST_ZEHNFU  =  (open[-2] - close[-2]) / close[-2] <= 0.02
-        SECOND_ZEHNFU =  (open[-3] - close[-3]) / close[-3] <= 0.02
+        FIRST_ZEHNFU  =  (open[-3] - close[-3]) / close[-3] <= 0.02
+        SECOND_ZEHNFU =  (open[-4] - close[-4]) / close[-3] <= 0.02
 
-        tiaojian1     = (close[-1] > open[-2]) and (close[-1] > open[-3]) and (close[-1] > close[-4])
-        tiaojian2     = (close[-1] > open[-1]) and (close[-2] < open[-2]) and (close[-3] < open[-3]) and (close[-4] > open[-4])
+        tiaojian1     = (close[-2] > open[-3]) and (close[-2] > open[-4]) and (close[-2] > close[-5])
+        tiaojian2     = (close[-2] > open[-2]) and (close[-3] < open[-3]) and (close[-4] < open[-4]) and (close[-5] > open[-5])
         #print(tiaojian1,tiaojian2)
         #tiaojian3 = (open[-2] > close[-4]) and (open[-3] > close[-4])
         tiaojian3       = 1
-        tiaojian4       = (low[-1] > open[-4] ) and (low[-2] > open[-4]) and (low[-3] > open[-4])
+        tiaojian4       = (low[-2] > open[-5] ) and (low[-3] > open[-5]) and (low[-4] > open[-5])
 
         diao            = FIRST_ZEHNFU and SECOND_ZEHNFU and tiaojian1 and \
                     tiaojian2    and tiaojian3     and tiaojian4 and \
                     FIRST_YANG   and SENCOD_YIN    and THIRD_YIN and FOURTH_YANG
-        stop                = low[-4]
+        stop                = low[-5]
         classlocal.diao     = diao
         classlocal.diaosp   = stop
     else:
@@ -829,7 +829,7 @@ def model_process(ContextInfo,check_list):
 
                 classlocal.last_price       = last_price
                 classlocal.profit           = 0
-                middlepricet                = (high[-1] - low[-1])/2 + low[-1]
+                middlepricet                = (high[-2] - low[-2])/2 + low[-2]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
@@ -860,7 +860,7 @@ def model_process(ContextInfo,check_list):
 
                 classlocal.last_price       = last_price
                 classlocal.profit           = 0
-                middlepricet                = (high[-1] - low[-1])/2 + low[-1]
+                middlepricet                = (high[-2] - low[-2])/2 + low[-2]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
@@ -891,7 +891,7 @@ def model_process(ContextInfo,check_list):
 
                 classlocal.last_price       = last_price
                 classlocal.profit           = 0
-                middlepricet                = (high[-1] - low[-1])/2 + low[-1]
+                middlepricet                = (high[-2] - low[-2])/2 + low[-2]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
@@ -923,7 +923,7 @@ def model_process(ContextInfo,check_list):
 
                 classlocal.last_price       = last_price
                 classlocal.profit           = 0
-                middlepricet                = (high[-1] - low[-1])/2 + low[-1]
+                middlepricet                = (high[-2] - low[-2])/2 + low[-2]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
@@ -954,7 +954,7 @@ def model_process(ContextInfo,check_list):
 
                 classlocal.last_price       = last_price
                 classlocal.profit           = 0
-                middlepricet                = (high[-1] - low[-1])/2 + low[-1]
+                middlepricet                = (high[-2] - low[-2])/2 + low[-2]
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
