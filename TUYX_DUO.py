@@ -80,7 +80,7 @@ class b():
 classlocal = b()
 
 classlocal.printmoney_en            = 1
-classlocal.printlocalhold_en        = 1
+classlocal.printlocalhold_en        = 0
 classlocal.sell_debug_inf_en        = 0
 classlocal.checklist_debug_en       = 0 #打印本地自选股行情
 classlocal.Index_time_debug_en      = 0
@@ -92,7 +92,7 @@ classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
 classlocal.TPDYX_debug_en           = 0 #debug信息打印
-classlocal.TPDYX_STOP_DEBUG         = 0 #行情止损打印
+classlocal.TPDYX_STOP_DEBUG         = 1 #行情止损打印
 classlocal.check_list               = ['SA00.ZF']
 classlocal.check_list_debug_en      = 0 #自定义行情品种
 
@@ -668,23 +668,29 @@ def handlebar(ContextInfo):
             ############################################################################################################################
             #
             #买入后多少天后方向走坏了
-            ML_length               =classlocal.M_HL
-            MA_closes               = Convert_the_market_data_type(closes,lows,ML_length)
+            ML_length1              = classlocal.MA_middle_length + 9
+            ML_length2              = classlocal.MA_middle_length
+
+            MA_closes               = Convert_the_market_data_type(closes,lows,ML_length1)
             #昨日13日收盘价均值
-            MA_middle               = np.mean(MA_closes[-classlocal.MA_middle_length-1:-1])
-            MA_middle_7             = np.mean(MA_closes[-(classlocal.MA_middle_length+7):-7])
+            MA_middle               = np.mean(MA_closes[-(ML_length2 - 1):-1])
+            MA_middle_7             = np.mean(MA_closes[-(ML_length2 + 7):-7])
             #昨日34日收盘价均值
-            MA_long                 = np.mean(MA_closes[-classlocal.MA_long_length-1:-1])
-            MA_long_7               = np.mean(MA_closes[-(classlocal.MA_long_length+7):-7])
+            MA_long                 = np.mean(MA_closes[-(ML_length2 - 1):-1])
+            MA_long_7               = np.mean(MA_closes[-(ML_length2 + 7):-7])
             sell_TPDYX_stopcheck    = MA_middle < MA_middle_7    #均线朝下检查离场
 
             lefthand                = sell_TPDYX_stopcheck and (BarSinceEntry >= classlocal.sellTPDYX_time)
             if classlocal.TPDYX_STOP_DEBUG:
                 print('\ncode:',code)
-                print('\nselTPDYX_stopcheck :',classlocal.selTPDYX_stopcheck)
+                print('\nMA_middle:',MA_middle)
+                print('\nMA_middle_7:',MA_middle)
+                print('\nlefthand:',lefthand)
+                print('\nselTPDYX_stopcheck :',sell_TPDYX_stopcheck)
                 print('\nBarSinceEntry:',BarSinceEntry)
                 print('\nsellTPDYX_time:',classlocal.sellTPDYX_time)
-            if lefthand:
+
+            if lefthand == False:
                 classlocal.sp_type = '行情止损'
                 Sell_list.append(code)
             ############################################################################################################################
@@ -1024,7 +1030,7 @@ def open_long_position(model_df_level2,ContextInfo):
                         #passorder(0,     1101,     'test',     target,      5,     -1,  10, ContextInfo)
                         #passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
                         # 开多
-                        passorder(opType, orderType, accountid, orderCode,prType,0.0,1,2,ContextInfo)
+                        passorder(opType, orderType, accountid, orderCode,prType,0.0,volume,order_now,ContextInfo)
                         #对手价、金额下单
                         classlocal.buy_code_count             += 1
                         #print(remark)
@@ -1359,10 +1365,6 @@ def sell_all_holding_Stock(ContextInfo) :
             print('nosell_stock')
     else :
         print('nosell_stock')
-
-###################################start###########################################################################
-#
-###################################start###########################################################################
 ###################################start###########################################################################
 #
 ###################################start###########################################################################
@@ -1377,8 +1379,8 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
 
     DTCS            = (MA1_short > MA2_long) and (MA2_long > MA2_long7)                          #均线多头朝上
     YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and\
-					  (close[-2]>open[-2])  #阳线上穿
-    JRZGD           = high[-2] >= highmax  #突破这天就是近日最高点
+                      (close[-2]>open[-2])  #阳线上穿
+    JRZGD           = high[-2] >= highmax   #突破这天就是近日最高点
     low_12          = min(low[-2],low[-3],low[-4])
 
     righthand       = DTCS and YXSC and JRZGD
@@ -2110,4 +2112,5 @@ def send_message_to_feishu(classlocal):
             print('发送失败')
     except requests.exceptions.RequestException as e:
         print("发送失败：", e)
+
 
