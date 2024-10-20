@@ -79,20 +79,20 @@ class b():
     pass
 classlocal = b()
 
-classlocal.printmoney_en            = 1
-classlocal.printlocalhold_en        = 0
+classlocal.printmoney_en            = 0
+classlocal.printlocalhold_en        = 1
 classlocal.sell_debug_inf_en        = 0
 classlocal.checklist_debug_en       = 0 #打印本地自选股行情
 classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
 classlocal.TPDYX_debug_en           = 0 #debug信息打印
-classlocal.TPDYX_STOP_DEBUG         = 1 #行情止损打印
+classlocal.TPDYX_STOP_DEBUG         = 0 #行情止损打印
 classlocal.check_list               = ['SA00.ZF']
 classlocal.check_list_debug_en      = 0 #自定义行情品种
 
@@ -104,7 +104,7 @@ classlocal.Period_Type              = '15m'
 classlocal.trade_buy_record_dict    = {}                # 02 买入交易记录
 classlocal.buy_code_count           = 0                 # 03 风控函数，防止买入过多。
 classlocal.Reflash_buy_list         = 1
-classlocal.lefthand_checken         = True # True 打开行情止损 False 关闭
+classlocal.lefthand_checken         = 1                 # 1 打开行情止损 0 关闭
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
 classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
 
@@ -245,9 +245,11 @@ def init(ContextInfo):
     '''
     eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                               'FT8','FT9','FTA','FTB','FTC']
-    '''
+
     eastmoney_zx_name_listt = ['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                               'FT8','FT9']# ['FUTURE']
+   '''                          
+    eastmoney_zx_name_listt = ['FT1']
     #当前K线的对应的下标从0开始
     #---------------------------------------------------------------------------
     # 账号为模型交易界面选择账号
@@ -679,6 +681,7 @@ def handlebar(ContextInfo):
             #昨日34日收盘价均值
             MA_long                 = np.mean(MA_closes[-(ML_length2 - 1):-1])
             MA_long_7               = np.mean(MA_closes[-(ML_length2 + 7):-7])
+
             sell_TPDYX_stopcheck    = MA_middle < MA_middle_7    #均线朝下检查离场
 
             lefthand                = sell_TPDYX_stopcheck and (BarSinceEntry >= classlocal.sellTPDYX_time)
@@ -690,8 +693,9 @@ def handlebar(ContextInfo):
                 print('\nselTPDYX_stopcheck :',sell_TPDYX_stopcheck)
                 print('\nBarSinceEntry:',BarSinceEntry)
                 print('\nsellTPDYX_time:',classlocal.sellTPDYX_time)
-
-            if (lefthand & classlocal.lefthand_checken) == False:
+            #均线朝下的时候卖出
+            if (lefthand == True) and \
+               (classlocal.lefthand_checken):
                 classlocal.sp_type = '行情止损'
                 Sell_list.append(code)
             ############################################################################################################################
@@ -753,20 +757,6 @@ def handlebar(ContextInfo):
                 local_hold.loc[code,'Price_SellS1'] = Price_SellS1
                 #平多：当前收盘大于止损价格
                 classlocal.SellS1                   = Last_Price < Price_SellS1
-                #执行卖出操作
-                if classlocal.sell_debug_inf_en :
-                    print(code)
-                    print(index_time)
-                    print('Price_SellS1',Price_SellS1)
-                    print('Price_SellY1',Price_SellY1)
-                    print('Last_Price',Last_Price)
-                    print('classlocal.ATR',classlocal.ATR)
-                    #print('MLlows',MLlows)
-                    #print('MLhighs',MLhighs)
-                    print('LowPrice',LowPrice)
-                    print('ML_value',ML_value)
-                    print('min(LowPrice,ML_value)',min(LowPrice,ML_value))
-
                 if classlocal.SellS1 or classlocal.SellY1 :
                     if code not in Sell_list:
                         #放入卖出列表
@@ -781,6 +771,14 @@ def handlebar(ContextInfo):
                         Sell_list.append(code)
                 if classlocal.JLZY_debug_en:
                     print('退出棘轮止盈持仓信息:',local_hold)
+                            #执行卖出操作
+            if classlocal.sell_debug_inf_en :
+                print(code)
+                print(index_time)
+                print('Price_SellS',Price_SellS)
+                print('Price_SellS1',Price_SellS1)
+                print('Price_SellY1',Price_SellY1)
+                print('Last_Price',Last_Price)
             #---------------------------------------------------------------------------------------------------------------------------
             #持续监控
             #print(code)
@@ -1084,7 +1082,7 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
             availableStock  = g_query.get_available_holding(code)
             availableStock  = int(availableStock)
 
-            opType          = 1                      # 1：平左多 7：平多,优先平昨
+            opType          = 7                      # 1：平左多 7：平多,优先平昨
             orderType       = 1101                   #单股、单账号、普通、股/手方式下单
             accountid       = ContextInfo.accID      #账号
             orderCode       = code                   #代码
@@ -1382,7 +1380,7 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and\
                       (close[-2]>open[-2])  #阳线上穿
     JRZGD           = high[-2] >= highmax   #突破这天就是近日最高点
-    low_12          = min(low[-2],low[-3],low[-4])
+    low_12          = min(low[-2],low[-3],low[-4],low[-5])
 
     righthand       = DTCS and YXSC and JRZGD
     if classlocal.TPDYX_debug_en:
@@ -1394,6 +1392,8 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
             print("\nhigh:",high)
             print("\nhighmax:",highmax)
             print("\nlowmin:",lowmin)
+            print("\nlow_12:",low_12)
+            print("\low:",low)
         #print("\nselTPDYX_stopcheck:",classlocal.selTPDYX_stopcheck)
 
     classlocal.TPDYX    =  0
