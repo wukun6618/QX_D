@@ -87,7 +87,7 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
@@ -104,6 +104,7 @@ classlocal.Period_Type              = '15m'
 classlocal.trade_buy_record_dict    = {}                # 02 买入交易记录
 classlocal.buy_code_count           = 0                 # 03 风控函数，防止买入过多。
 classlocal.Reflash_buy_list         = 1
+classlocal.lefthand_checken         = True # True 打开行情止损 False 关闭
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
 classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
 
@@ -690,7 +691,7 @@ def handlebar(ContextInfo):
                 print('\nBarSinceEntry:',BarSinceEntry)
                 print('\nsellTPDYX_time:',classlocal.sellTPDYX_time)
 
-            if lefthand == False:
+            if (lefthand & classlocal.lefthand_checken) == False:
                 classlocal.sp_type = '行情止损'
                 Sell_list.append(code)
             ############################################################################################################################
@@ -2112,5 +2113,7 @@ def send_message_to_feishu(classlocal):
             print('发送失败')
     except requests.exceptions.RequestException as e:
         print("发送失败：", e)
+
+
 
 
