@@ -70,7 +70,7 @@ list_data_values                    = []#[[0,0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0
 ATR_LEN                             = 5
 YKB                                 = 3
 DEFAULT_NUMBER_OF_POINTS            = 0.02
-
+TRADE_DIRECT                        = 48
 class b():
     pass
 classlocal = b()
@@ -91,7 +91,7 @@ classlocal.TPDYX_debug_en           = 0 #debug信息打印
 classlocal.TPDYX_STOP_DEBUG         = 0 #行情止损打印
 classlocal.check_list               = ['SA00.ZF']
 classlocal.check_list_debug_en      = 0 #自定义行情品种
-classlocal.contract_debug_en        = 1 #打印合约信息
+classlocal.contract_debug_en        = 0 #打印合约信息
 # -------------------------------------------#
 # 数据类型
 classlocal.p                        = 0                 #绘图点用
@@ -420,18 +420,16 @@ def handlebar(ContextInfo):
             #print('dPositionCost',dPositionCost)
             local_hold.loc[code,'dMarketValue']       = decimal_places_are_rounded(obj.m_dMarketValue,2)
             local_hold.loc[code,'dLastPrice']         = decimal_places_are_rounded(obj.m_dLastPrice,2)
-            
+            local_hold.loc[code,'tradedirection']     = TRADE_DIRECT
+            #账户代码持仓方向
+            remote_tradedirection                     =  obj.m_nDirection
             #open_price                                = local_hold.loc[code,'Price_BuyK']
             #-----------------------------------------------------------------------------------------------------
-
             Price_SellY1_debug = local_hold.loc[code,'Price_SellY1']
-            #print('查询到的持仓代码:',code)
-            #print('Price_SellY1_debug1:',Price_SellY1_debug)
-            #print('local_hold-start_update\n',local_hold)
-            #
+            
             if code in model_df_level2.index:
                 if code in local_hold.index:
-                    list_clolums2 = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK','tradedirection']
+                    list_clolums2 = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
                     #print('model_df_level2\n',model_df_level2)
                     #print('local_hold-updating\n',local_hold)
                     for clum in list_clolums2 :
@@ -459,7 +457,7 @@ def handlebar(ContextInfo):
             #之所以不查云端的是因为，可能存在多空都存在，不确定是什么值
             tradedirection      = float(local_hold.loc[code,'tradedirection'])
             #如果此时读到的不是多就跳过此次判断，不去执行
-            if tradedirection   != 48:
+            if tradedirection   != remote_tradedirection:
                continue
             mLast_KIndex        = float(local_hold.loc[code,'mLast_KIndex'])
             mBuy_KIndex         = float(local_hold.loc[code,'mBuy_KIndex'])
@@ -520,7 +518,7 @@ def handlebar(ContextInfo):
                 local_hold.loc[code,'ATR_Start_time']   = 0
             if pd.isna(tradedirection):
                 tradedirection                          = 0
-                local_hold.loc[code,'tradedirection']   = 48
+                local_hold.loc[code,'tradedirection']   = TRADE_DIRECT
 
             mLast_KIndex                                = int(mLast_KIndex)
             #--------------------------------------------------------------
@@ -1614,7 +1612,7 @@ def model_process(ContextInfo,check_list):
                 takprofit                    = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
-                G_df.loc[code,'tradedirection']        = 48  # 48 多 49 ：空
+                G_df.loc[code,'tradedirection']        = TRADE_DIRECT  # 48 多 49 ：空
 
                 classlocal.trade_direction  = 'duo' #duo #kong
                 classlocal.code             = code
