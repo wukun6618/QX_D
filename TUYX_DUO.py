@@ -83,7 +83,7 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
@@ -91,7 +91,7 @@ classlocal.TPDYX_debug_en           = 0 #debug信息打印
 classlocal.TPDYX_STOP_DEBUG         = 0 #行情止损打印
 classlocal.check_list               = ['SA00.ZF']
 classlocal.check_list_debug_en      = 0 #自定义行情品种
-
+classlocal.contract_debug_en        = 1 #打印合约信息
 # -------------------------------------------#
 # 数据类型
 classlocal.p                        = 0                 #绘图点用
@@ -101,6 +101,8 @@ classlocal.trade_buy_record_dict    = {}                # 02 买入交易记录
 classlocal.buy_code_count           = 0                 # 03 风控函数，防止买入过多。
 classlocal.Reflash_buy_list         = 1
 classlocal.lefthand_checken         = 1                 # 1 打开行情止损 0 关闭
+classlocal.LongMarginRatio_add      = 0.45               # 在最低保证金基础增肌的比例
+
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
 classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
 
@@ -238,15 +240,11 @@ def init(ContextInfo):
     M_End_Time              = "02:57:00"
     singel_zf_lastK         = 0.03
     eastmoney_user_buy_list = ['SFT']# ['FUTURE']
-    '''
-    eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
-                              'FT8','FT9','FTA','FTB','FTC']
-                        
-    eastmoney_zx_name_listt = ['FT1']
-    '''
-    eastmoney_zx_name_listt = ['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
-                              'FT8','FT9']# ['FUTURE']
-
+    if classlocal.huicedebug_en:
+        eastmoney_zx_name_listt = ['FT1']
+    else:
+        eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
+                                'FT8','FT9','FTA','FTB','FTC']
     #当前K线的对应的下标从0开始
     #---------------------------------------------------------------------------
     # 账号为模型交易界面选择账号
@@ -1008,9 +1006,9 @@ def open_long_position(model_df_level2,ContextInfo):
                 orderType       = 1101                   #单股、单账号、普通、股/手方式下单
                 accountid       = ContextInfo.accID      #账号
                 orderCode       = code                   #代码
-                prType          = 5                     #对手价（对方盘口一档价）
+                prType          = 5                      #对手价（对方盘口一档价）
                 price           = buy_price              #开仓价格#实际无效
-                volume          = 1                      #availableStock         #买入1手数
+                volume          = availableStock         #availableStock         #买入1手数
                 strategyName    = remark                 #"七星开多"#remark                 #策略名称
                 quickTrade      = 1                      #立即触发下单,1：历史触发在实盘不会执行，2：历史触发在实盘会执行
                 userOrderId     = "888888"
@@ -1206,12 +1204,27 @@ def uptate_local_hold_prama(code):
     #print('local_hold-stop_update\n',local_hold)
  ###################################start###########################################################################
 #获取合约的保证金以便计算手数，get_instrumentdetail 返回的是一个字典
+#保证金=报价*交易单位*保证金比例=2000*10*10%=2000元
 ###################################start###########################################################################   
 def get_signal_margin(optioncode,ContextInfo):
     instrumentdetail_dict = ContextInfo.get_instrumentdetail(optioncode)
     LongMarginRatio       = instrumentdetail_dict['LongMarginRatio']    #多头保证金
-    ShortMarginRatio      = instrumentdetail_dict['ShortMarginRatio']   #空头保证金
-    return LongMarginRatio
+    PreClose              = instrumentdetail_dict['PreClose']
+    #PriceTick:最小变价单位
+    PriceTick             = instrumentdetail_dict['PriceTick']
+    ShortMarginRatio      = instrumentdetail_dict['ShortMarginRatio']   #空头保证金比例
+    #VolumeMultiple:合约乘数
+    VolumeMultiple        = instrumentdetail_dict['VolumeMultiple']
+    #VolumeMultiple        = 0.20
+    #保证金
+    LongMargin            = (PreClose * PriceTick * VolumeMultiple * LongMarginRatio)/100
+    LongMargin            = LongMargin * (1+ classlocal.LongMarginRatio_add)
+    LongMargin            = decimal_places_are_rounded(LongMargin,4)
+
+    if classlocal.contract_debug_en:
+        print('instrumentdetail_dict:\n',instrumentdetail_dict)
+        print('LongMargin:\n',LongMargin)
+    return LongMargin
 ###################################start###########################################################################
 #非常重要:仓位管理函数 默认单只股票占仓位的1/10
 ###################################start###########################################################################
@@ -1543,6 +1556,12 @@ def model_process(ContextInfo,check_list):
             print(f'lowmin\n{lowmin}')
             print(f'highmax\n{highmax}')
 
+        rows        = h_data.shape[0] 
+        if  rows< classlocal.MA_long_length + 9:
+            print(f'code:{code},行数:{rows}')
+            print(f'计算均线数据长度不够结束本次筛选\n')
+            continue
+
         if((closemin > 0) and (openmin > 0) and (lowmin > 0) and highmax):
             #print('G_df.loc[code,'Price_SellS']:',G_df.loc[code,'Price_SellS'])
             #转成数组可以按照index取值
@@ -1571,19 +1590,13 @@ def model_process(ContextInfo,check_list):
             MA_long_7               = np.mean(close[-(classlocal.MA_long_length+7):-7])
             TPDYX                   = 0
             if classlocal.TPDYX_en:
-                rows        = h_data.shape[0]
-                if  rows< classlocal.MA_long_length + 9:
-                    print(f'code:{code},行数:{rows}')
-                    print(f'计算均线数据长度不够结束本次筛选\n')
-                    TPDYX                        = 0
-                else:
-                    MA1_short                    = MA_middle
-                    MA1_short7                   = MA_middle_7
-                    MA2_long                     = MA_long
-                    MA2_long7                    = MA_long_7
-                    TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
-                    TPDYX                        = classlocal.TPDYX
-                    TPDYXsp                      = classlocal.TPDYXsp
+                MA1_short                    = MA_middle
+                MA1_short7                   = MA_middle_7
+                MA2_long                     = MA_long
+                MA2_long7                    = MA_long_7
+                TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
+                TPDYX                        = classlocal.TPDYX
+                TPDYXsp                      = classlocal.TPDYXsp
             last_price                       = close[-1]
             #---------------------------------------------------------------------------------------
             ART_length                       = classlocal.ATR_open_Length
