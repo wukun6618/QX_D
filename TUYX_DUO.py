@@ -426,7 +426,7 @@ def handlebar(ContextInfo):
             #open_price                                = local_hold.loc[code,'Price_BuyK']
             #-----------------------------------------------------------------------------------------------------
             Price_SellY1_debug = local_hold.loc[code,'Price_SellY1']
-            
+
             if code in model_df_level2.index:
                 if code in local_hold.index:
                     list_clolums2 = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
@@ -1559,8 +1559,10 @@ def model_process(ContextInfo,check_list):
 
         rows        = h_data.shape[0] 
         if  rows< classlocal.MA_long_length + 9:
-            print(f'code:{code},行数:{rows}')
-            print(f'计算均线数据长度不够结束本次筛选\n')
+            if classlocal.TPDYX_debug_en:
+                print(f'code:{code},行数:{rows}')
+                print(f'计算均线数据长度不够结束本次筛选\n')
+
             continue
 
         if((closemin > 0) and (openmin > 0) and (lowmin > 0) and highmax):
