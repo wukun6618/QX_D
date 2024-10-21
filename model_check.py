@@ -37,7 +37,7 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 1 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
@@ -216,7 +216,7 @@ def init(ContextInfo):
     accountType             = 'FUTURE'
     eastmoey_stockPath      = 'C:\\eastmoney\\swc8\\config\\User\\9489316496536486\\StockwayStock.ini'
     stockPath_sell          = 'C:\\new_tdx\\T0002\\blocknew\\QX.blk'
-    stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal1.csv'
+    stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal3.csv'
     user_buy_list_path      = 'C:\\Users\\wukun\\Desktop\\tradehistory\\userbuylist.csv'
     stockrecord             = 'C:\\Users\\wukun\\Desktop\\tradehistory\\tradehistoryrecord.csv'
     Max_buynums             = 8
@@ -225,12 +225,12 @@ def init(ContextInfo):
     M_End_Time              = "02:57:00"
     singel_zf_lastK         = 0.03
     eastmoney_user_buy_list = ['SFT']# ['FUTURE']
-    '''
+
+
     eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
-                              'FT8','FT9','FTA','FTB','FTC']
-    '''
-    eastmoney_zx_name_listt = ['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
-                              'FT8','FT9']# ['FUTURE']
+                              'FT8','FT9','FTA','FTB','FTC','FTD']
+
+
     #当前K线的对应的下标从0开始
     #---------------------------------------------------------------------------
     # 账号为模型交易界面选择账号
@@ -742,12 +742,6 @@ def model_process(ContextInfo,check_list):
             print(f'lowmin\n{lowmin}')
             print(f'highmax\n{highmax}')
 
-        rows        = h_data.shape[0] 
-        if  rows< classlocal.MA_long_length + 9:
-            print(f'code:{code},行数:{rows}')
-            print(f'计算均线数据长度不够结束本次筛选\n')
-            break
-
         if((closemin > 0) and (openmin > 0) and (lowmin > 0) and highmax):
             #print('G_df.loc[code,'Price_SellS']:',G_df.loc[code,'Price_SellS'])
             #转成数组可以按照index取值
@@ -775,16 +769,21 @@ def model_process(ContextInfo,check_list):
             MA_long                = np.mean(close[-classlocal.MA_long_length-1:-1])
             MA_long_7              = np.mean(close[-(classlocal.MA_long_length+7):-7])
 
-            
             qxlck                = 0
             diao                 = 0
             RED_TPDYX            = 0
             GREEN_TPDYXsp        = 0
             GREEN_TPDYX          = 0
             if classlocal.GREEN_TPDYX_en:
-                GREEN_TPDYX_checkout(MA_middle,MA_middle_7,MA_long,MA_long_7)
-                GREEN_TPDYX                        = classlocal.GREEN_TPDYX
-                GREEN_TPDYXsp                      = classlocal.GREEN_TPDYXsp
+                rows        = h_data.shape[0] 
+                if  rows< classlocal.MA_long_length + 9:
+                    print(f'code:{code},行数:{rows}')
+                    print(f'计算均线数据长度不够结束本次筛选\n')
+                    GREEN_TPDYX                        = 0
+                else :
+                    GREEN_TPDYX_checkout(MA_middle,MA_middle_7,MA_long,MA_long_7)
+                    GREEN_TPDYX                        = classlocal.GREEN_TPDYX
+                    GREEN_TPDYXsp                      = classlocal.GREEN_TPDYXsp
 
             if classlocal.qxlck_en :
                 QXLCK_checkout(MA_middle,MA_middle_7,MA_long,MA_long_7)
@@ -796,13 +795,20 @@ def model_process(ContextInfo,check_list):
                 diaosp                       = classlocal.diaosp
 
             if classlocal.RED_TPDYX_en:
-                MA1_short                    = MA_middle
-                MA1_short7                   = MA_middle_7
-                MA2_long                     = MA_long
-                MA2_long7                    = MA_long_7
-                RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
-                RED_TPDYX                    = classlocal.RED_TPDYX
-                RED_TPDYXsp                  = classlocal.RED_TPDYXsp
+                rows        = h_data.shape[0] 
+                if  rows< classlocal.MA_long_length + 9:
+                    print(f'code:{code},行数:{rows}')
+                    print(f'计算均线数据长度不够结束本次筛选\n')
+                    RED_TPDYX                    = 0
+                else:    
+                    MA1_short                    = MA_middle
+                    MA1_short7                   = MA_middle_7
+                    MA2_long                     = MA_long
+                    MA2_long7                    = MA_long_7
+                    RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
+                    RED_TPDYX                    = classlocal.RED_TPDYX
+                    RED_TPDYXsp                  = classlocal.RED_TPDYXsp
+
             #---------------------------------------------------------------------------------------
             last_price                       = close[-1]
             #---------------------------------------------------------------------------------------
