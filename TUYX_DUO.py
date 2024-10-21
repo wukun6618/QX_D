@@ -397,6 +397,9 @@ def handlebar(ContextInfo):
         #----------------------------------------------------------------------------------------------------------
         obj_list = get_trade_detail_data(ContextInfo.accID,'FUTURE','position')
         for obj in obj_list:
+            if classlocal.contract_debug_en:
+                print_position_data(obj)
+
             code = obj.m_strInstrumentID + '.' + obj.m_strExchangeID
             #----------------------------------------
             #更新上次数据到local_hold_df dataframe
