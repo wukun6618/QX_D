@@ -1669,6 +1669,7 @@ def calculate_ATR_from_buy_time(ContextInfo,buytime,code) :
 #郑商所 ZF 115.
 #上期所 SF 113.
 #中金所 IF 220.
+#广期所 GF 225
 #外部自定义市场 ED
 ###################################start###########################################################################
 def modify_elements(elements):
@@ -1686,6 +1687,8 @@ def modify_elements(elements):
             modified_elements.append(elem[2:] + '.SF')
         elif elem.startswith('220.'):
             modified_elements.append(elem[2:] + '.IF')
+        elif elem.startswith('225.'):
+            modified_elements.append(elem[2:] + '.GF')
         else:
             modified_elements.append(elem[2:] + '.ED')
     return modified_elements
