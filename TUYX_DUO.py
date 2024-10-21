@@ -242,6 +242,8 @@ def init(ContextInfo):
     eastmoney_user_buy_list = ['SFT']# ['FUTURE']
     if classlocal.huicedebug_en:
         eastmoney_zx_name_listt = ['FT1']
+        eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
+                                'FT8','FT9','FTA','FTB','FTC']
     else:
         eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                                 'FT8','FT9','FTA','FTB','FTC']
@@ -2059,6 +2061,7 @@ def send_message_to_feishu(classlocal):
             print('发送失败')
     except requests.exceptions.RequestException as e:
         print("发送失败：", e)
+
 
 
 
