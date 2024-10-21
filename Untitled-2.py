@@ -658,7 +658,7 @@ def Convert_the_market_data_type(tradedatas,tradedata_lows,length):
 def model_process(ContextInfo,check_list):
     endtime_t = '000000'
     list_data_values    = [0,0,0,0]
-    list_clolums        = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
+    list_clolums        = ['Kindex','Tradingday','Price_SellS','Price_SellY','duo']
     dit1                = dict(zip(range(0,0), list_data_values))
     #转置矩阵
     G_df                = pd.DataFrame(dit1,list_clolums).T
@@ -934,7 +934,7 @@ def model_process(ContextInfo,check_list):
                 str_modelname                 = "大阳线突破"
                 G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(RED_TPDYXsp,2)
 
-                G_df.loc[code,'ATR_BuyK']    = buy_atr
+                G_df.loc[code,'duo']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
                 Profit_loss_ratio            =  classlocal.Price_SetSellY_YKB
@@ -1027,7 +1027,7 @@ def local_hold_data_frame_init():
     list_data_values  = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
     locallist_clolums = ['Code','Price_SellY_Flag','BarSinceEntry','Price_SellY','Price_SellY1','Price_SellS',\
                         'Price_SellS1','dLastPrice','dProfitRate','Buy_time','nVolume','nCanUseVolume',\
-                        'PositionProfit','ATR_Start_time','dMarketValue','Tradingday','Price_BuyK','mBuy_KIndex','mLast_KIndex','strInstrumentID','ATR_BuyK']
+                        'PositionProfit','ATR_Start_time','dMarketValue','Tradingday','Price_BuyK','mBuy_KIndex','mLast_KIndex','strInstrumentID','duo']
     dit1 = dict(zip(range(0,0), list_data_values))
     #转置矩阵
     G_df = pd.DataFrame(dit1,locallist_clolums).T

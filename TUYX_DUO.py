@@ -79,7 +79,7 @@ class b():
     pass
 classlocal = b()
 
-classlocal.printmoney_en            = 0
+classlocal.printmoney_en            = 1
 classlocal.printlocalhold_en        = 1
 classlocal.sell_debug_inf_en        = 0
 classlocal.checklist_debug_en       = 0 #打印本地自选股行情
@@ -87,7 +87,7 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
@@ -423,6 +423,7 @@ def handlebar(ContextInfo):
             #print('dPositionCost',dPositionCost)
             local_hold.loc[code,'dMarketValue']       = decimal_places_are_rounded(obj.m_dMarketValue,2)
             local_hold.loc[code,'dLastPrice']         = decimal_places_are_rounded(obj.m_dLastPrice,2)
+            
             #open_price                                = local_hold.loc[code,'Price_BuyK']
             #-----------------------------------------------------------------------------------------------------
 
@@ -433,7 +434,7 @@ def handlebar(ContextInfo):
             #
             if code in model_df_level2.index:
                 if code in local_hold.index:
-                    list_clolums2 = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
+                    list_clolums2 = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK','tradedirection']
                     #print('model_df_level2\n',model_df_level2)
                     #print('local_hold-updating\n',local_hold)
                     for clum in list_clolums2 :
@@ -458,7 +459,11 @@ def handlebar(ContextInfo):
                     print('更新初始持仓信息\n',local_hold)
                     ##print('model_df_level2_end_drop_code\n',model_df_level2)
             #-----------------------------------------------------------------------------------------------------
-
+            #之所以不查云端的是因为，可能存在多空都存在，不确定是什么值
+            tradedirection      = float(local_hold.loc[code,'tradedirection'])
+            #如果此时读到的不是多就跳过此次判断，不去执行
+            if tradedirection   != 48:
+               continue
             mLast_KIndex        = float(local_hold.loc[code,'mLast_KIndex'])
             mBuy_KIndex         = float(local_hold.loc[code,'mBuy_KIndex'])
             BarSinceEntry       = local_hold.loc[code,'BarSinceEntry']
@@ -516,6 +521,9 @@ def handlebar(ContextInfo):
             if pd.isna(ATR_Start_time):
                 ATR_Start_time                          = 0
                 local_hold.loc[code,'ATR_Start_time']   = 0
+            if pd.isna(tradedirection):
+                tradedirection                          = 0
+                local_hold.loc[code,'tradedirection']   = 48
 
             mLast_KIndex                                = int(mLast_KIndex)
             #--------------------------------------------------------------
@@ -1183,7 +1191,7 @@ def uptate_local_hold_prama(code):
     #print('local_hold-start_update\n',local_hold)
     if code in model_df_level2.index:
         if code in local_hold.index:
-            list_clolums2 = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
+            list_clolums2 = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK','tradedirection']
             for clum in list_clolums2 :
                 #print('clum:\n',clum)
                 local_hold.loc[code,'BarSinceEntry']    = 0
@@ -1405,7 +1413,7 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
         classlocal.TPDYX    = 0
         classlocal.TPDYXsp  = 8888
 ###################################start###########################################################################
-#
+
 ###################################start###########################################################################
 def compare_values_min(value1, value2):
     if value1 < value2:
@@ -1535,7 +1543,7 @@ def model_process(ContextInfo,check_list):
     endtime_t = '000000'
     list_data_values    = [0,0,0,0]
 
-    list_clolums        = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
+    list_clolums        = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK','tradedirection']
     dit1                = dict(zip(range(0,0), list_data_values))
     #转置矩阵
     G_df                = pd.DataFrame(dit1,list_clolums).T
@@ -1545,8 +1553,6 @@ def model_process(ContextInfo,check_list):
     #获取数据           #
     length1             = classlocal.modul_length+5
     period_t            = classlocal.Period_Type
-   # h_data              = get_market_data_ex_modify(ContextInfo,check_list,period_t,endtime,length1)
-    #
     h_data_init         = ContextInfo.get_market_data_ex(['close','high','open','low','volume'],\
                         check_list,period = period_t,end_time=endtime,count=length1,\
                         dividend_type='front', fill_data=True, subscribe = True)
@@ -1618,12 +1624,6 @@ def model_process(ContextInfo,check_list):
             print(f'lowmin\n{lowmin}')
             print(f'highmax\n{highmax}')
 
-        rows        = h_data.shape[0] 
-        if  rows< classlocal.MA_long_length + 9:
-            print(f'code:{code},行数:{rows}')
-            print(f'计算均线数据长度不够结束本次筛选\n')
-            continue
-
         if((closemin > 0) and (openmin > 0) and (lowmin > 0) and highmax):
             #print('G_df.loc[code,'Price_SellS']:',G_df.loc[code,'Price_SellS'])
             #转成数组可以按照index取值
@@ -1648,17 +1648,23 @@ def model_process(ContextInfo,check_list):
             MA_middle                = np.mean(close[-classlocal.MA_middle_length-1:-1])
             MA_middle_7              = np.mean(close[-(classlocal.MA_middle_length+7):-7])
             #昨日34日收盘价均值
-            MA_long                = np.mean(close[-classlocal.MA_long_length-1:-1])
-            MA_long_7              = np.mean(close[-(classlocal.MA_long_length+7):-7])
-            TPDYX                = 0
+            MA_long                 = np.mean(close[-classlocal.MA_long_length-1:-1])
+            MA_long_7               = np.mean(close[-(classlocal.MA_long_length+7):-7])
+            TPDYX                   = 0
             if classlocal.TPDYX_en:
-                MA1_short                    = MA_middle
-                MA1_short7                   = MA_middle_7
-                MA2_long                     = MA_long
-                MA2_long7                    = MA_long_7
-                TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
-                TPDYX                        = classlocal.TPDYX
-                TPDYXsp                      = classlocal.TPDYXsp
+                rows        = h_data.shape[0]
+                if  rows< classlocal.MA_long_length + 9:
+                    print(f'code:{code},行数:{rows}')
+                    print(f'计算均线数据长度不够结束本次筛选\n')
+                    TPDYX                        = 0
+                else:
+                    MA1_short                    = MA_middle
+                    MA1_short7                   = MA_middle_7
+                    MA2_long                     = MA_long
+                    MA2_long7                    = MA_long_7
+                    TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
+                    TPDYX                        = classlocal.TPDYX
+                    TPDYXsp                      = classlocal.TPDYXsp
             last_price                       = close[-1]
             #---------------------------------------------------------------------------------------
             ART_length                       = classlocal.ATR_open_Length
@@ -1673,6 +1679,7 @@ def model_process(ContextInfo,check_list):
                 takprofit                    = decimal_places_are_rounded(zf_zy,2)
                 G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
+                G_df.loc[code,'tradedirection']        = 48  # 48 多 49 ：空
 
                 classlocal.trade_direction  = 'duo' #duo #kong
                 classlocal.code             = code
@@ -1788,7 +1795,7 @@ def local_hold_data_frame_init():
     list_data_values  = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]
     locallist_clolums = ['Code','Price_SellY_Flag','BarSinceEntry','Price_SellY','Price_SellY1','Price_SellS',\
                         'Price_SellS1','dLastPrice','dProfitRate','Buy_time','nVolume','nCanUseVolume',\
-                        'PositionProfit','ATR_Start_time','dMarketValue','Tradingday','Price_BuyK','mBuy_KIndex','mLast_KIndex','strInstrumentID','ATR_BuyK']
+                        'PositionProfit','ATR_Start_time','dMarketValue','Tradingday','Price_BuyK','mBuy_KIndex','mLast_KIndex','strInstrumentID','ATR_BuyK','tradedirection']
     dit1 = dict(zip(range(0,0), list_data_values))
     #转置矩阵
     G_df = pd.DataFrame(dit1,locallist_clolums).T

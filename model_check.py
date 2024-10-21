@@ -658,7 +658,7 @@ def Convert_the_market_data_type(tradedatas,tradedata_lows,length):
 def model_process(ContextInfo,check_list):
     endtime_t = '000000'
     list_data_values    = [0,0,0,0]
-    list_clolums        = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK']
+    list_clolums        = ['Kindex','Tradingday','Price_SellS','Price_SellY','ATR_BuyK','duo']
     dit1                = dict(zip(range(0,0), list_data_values))
     #转置矩阵
     G_df                = pd.DataFrame(dit1,list_clolums).T
