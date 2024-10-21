@@ -27,10 +27,6 @@ XML格式如下：目前还可以加入两个自定义控件
 二 监控时间（面单自己设定）：
 连续竞价：09:30:00 - 10:30:00
 
-三 买入条件（面单自己设定）
-01  若有买入股票池,   则买入;  （最大买入股票数量,最大为10只）
-02  单股买入金额： 可用资金*10%;
-
 四 卖出条件
    若有卖出股票池且有持仓,   则全部卖出;
 
@@ -199,15 +195,15 @@ classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5a
 # -------------------------------------------#
 # -------------------------------------------#
 # 判断类型
-classlocal.BuyPK    = False  # 开多条件
-classlocal.SellPK   = False  # 开空条件
-classlocal.BuyAK    = False  # 加多条件
-classlocal.SellAK   = False  # 加空条件
-classlocal.BuyA     = False  # 加仓使能
-classlocal.SellA    = False  # 加空使能
-classlocal.BuyS     = False  # 多头止损
-classlocal.SellS    = False  # 空头止损
-classlocal.BuyY     = False  # 空头止盈
+#classlocal.BuyPK    = False  # 开多条件
+#classlocal.SellPK   = False  # 开空条件
+#classlocal.BuyAK    = False  # 加多条件
+#classlocal.SellAK   = False  # 加空条件
+#classlocal.BuyA     = False  # 加仓使能
+#classlocal.SellA    = False  # 加空使能
+#classlocal.BuyS     = False  # 多头止损
+#classlocal.SellS    = False  # 空头止损
+#classlocal.BuyY     = False  # 空头止盈
 classlocal.SellY    = False  # 多头止盈
 classlocal.ISfirst  = True   # 多头止盈
 
@@ -236,7 +232,7 @@ def init(ContextInfo):
     stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal1.csv'
     user_buy_list_path      = 'C:\\Users\\wukun\\Desktop\\tradehistory\\userbuylist.csv'
     stockrecord             = 'C:\\Users\\wukun\\Desktop\\tradehistory\\tradehistoryrecord.csv'
-    Max_buynums             = 8
+    Max_buynums             = 2
 
     M_Start_Time            = "09:25:00"
     M_End_Time              = "02:57:00"
@@ -1005,7 +1001,7 @@ def open_long_position(model_df_level2,ContextInfo):
                 buy_price               = buy_pricet
                 availableStock          = Buy_df.loc[code,'SingleNum']
                 availableStock          = int(availableStock)
-                availableStock          = 1
+                #availableStock          = 1
                 signal_stock_money      = availableStock * buy_price
                 remark          = '【{}】买入{}共{}股{}元'.format(classlocal.Kindex_time,code,availableStock,signal_stock_money)
                 opType          = 0                      # 0：开多
@@ -1208,128 +1204,51 @@ def uptate_local_hold_prama(code):
             Buy_df.drop(code,inplace=True)
     #买完删除
     #print('local_hold-stop_update\n',local_hold)
-
+ ###################################start###########################################################################
+#获取合约的保证金以便计算手数，get_instrumentdetail 返回的是一个字典
+###################################start###########################################################################   
+def get_signal_margin(optioncode,ContextInfo):
+    instrumentdetail_dict = ContextInfo.get_instrumentdetail(optioncode)
+    LongMarginRatio       = instrumentdetail_dict['LongMarginRatio']    #多头保证金
+    ShortMarginRatio      = instrumentdetail_dict['ShortMarginRatio']   #空头保证金
+    return LongMarginRatio
 ###################################start###########################################################################
 #非常重要:仓位管理函数 默认单只股票占仓位的1/10
 ###################################start###########################################################################
 def position_opening_calculat(ContextInfo,buy_list):
-    #global Totalmoney_dynamic
 
     list_data_values    = [0,0,0,0]
-    list_clolumsp       = ['Kindex','Kindex_time','SingleNum','ATR_BuyK']
+    list_clolumsp       = ['Kindex','Kindex_time','SingleNum']
     dit1 = dict(zip(range(0,0), list_data_values))
     #转置矩阵
     M_df = pd.DataFrame(dit1,list_clolumsp).T
 
-    #没有可用资金直接返回
-    #if classlocal.LeftMoey <=600:
-    #    return M_df
-    #初始资金为2万
-    #: 总资产           总市值  可用余额         当前交易日     持仓盈亏
-    #0 200002129.190   0.000 200002129.190   20240308     0.000
-    sinlevalue          = 0
-    M_ATR               = 0
-    ZF_ATR              = 0
-
     LeftMoey            = classlocal.LeftMoey
     Totalmoney          = classlocal.Total_market_cap
-    Totalmoney          = decimal_places_are_rounded(Totalmoney,2)
-    #LeftMoey            = decimal_places_are_rounded(LeftMoeyt,2)
-    #Total_market_cap    = decimal_places_are_rounded(Total_market_cap,2)
-    td                  = classlocal.Kindex_time
-    Kindex              = classlocal.Kindex
-    classlocal.ATR      = 0
-
-    length              = classlocal.ATR_open_Length
-    h_data              = ContextInfo.get_market_data_ex(['close','high','open','low','LastPrice'],
-    buy_list,period     = classlocal.Period_Type,end_time = td,count = 20,
-    dividend_type='front', fill_data=True, subscribe = True)
-    #print('h_data\n',h_data)
-    # 可变总资金/最大股数
     signal_stock_money_maxt = Totalmoney /classlocal.max_buy_nums
     #单只最高可分配金额,
     signal_stock_money_max  = decimal_places_are_rounded(signal_stock_money_maxt,2)
-    #剩余金额可买100手
 
-    #print(f'L2_list:{L2_list}\n')
     if signal_stock_money_max > 0:
-
         for code in buy_list :
-            closes      = h_data[code]['close']
-            lows        = h_data[code]['low']
-            highs       = h_data[code]['high']
-            opens       = h_data[code]['open']
-            close       = np.array(closes)
-            low         = np.array(lows)
-            high        = np.array(highs)
-            LastPrice_t = close[-1]
-            LastPrice   = decimal_places_are_rounded(LastPrice_t,3)
-            lowmin      = lows.min()
-            OnePiontValue = 1
-            #print('lows\n',lows)
+            margin_t    = get_signal_margin(code,ContextInfo)
+            margin      = decimal_places_are_rounded(margin_t,3)
 
-            single_cost_money = 0
-            if lowmin > 0:
-                #print(f'\nsignal_stock_money_max:{signal_stock_money_max}元\nTotalmoney_dynamic:{Totalmoney_dynamic}元')
-                NATR                    = calculate_ATR(high,low,close,length) * OnePiontValue
-                #这里保证分仓有效，在固定的分仓比例下，进行调整买入股数
-                #------------------------------------------------------------------------------------------------------
-                '''
-                if NATR < 1:
-                    NATR  = 1
-                '''
-                #------------------------------------------------------------------------------------------------------
-                LastPrice_ATRt          = NATR*LastPrice*classlocal.TC_ATRratio
-                LastPrice_ATR           = decimal_places_are_rounded(LastPrice_ATRt,3)
-                #最大可买金额/当前金额
-                single_buy_max  = ((signal_stock_money_max/LastPrice) //100)*100
-                #最大金额/ATR金额
-                SingleNum       = ((signal_stock_money_max/LastPrice_ATR) //100)*100
+            #最大可买金额/当前金额
+            single_buy_max                   = int(signal_stock_money_max/margin) 
+            LeftMoey                         = LeftMoey - signal_stock_money_max
 
-                #print('code:',code)
-                #print('NATR:',NATR)
-                #print('LastPrice:',LastPrice)
-                #print('LastPrice_ATR:',LastPrice_ATR)
-                #print('single_buy_max:',single_buy_max)
-                #print('signal_stock_money_max:',signal_stock_money_max)
-                #print('SingleNum1:',SingleNum)
-
-                if SingleNum < single_buy_max:
-                    SingleNum   = SingleNum
-                else :
-                    SingleNum   = single_buy_max
-                #print('SingleNum2:',SingleNum)
-                single_cost_moneyt               = SingleNum * LastPrice
-                single_cost_money                = decimal_places_are_rounded(single_cost_moneyt,3)
-                LeftMoey                         = LeftMoey - single_cost_money
-                '''
-                if (LastPrice >= classlocal.TH_low ) and (LastPrice < classlocal.TH_High ):
-                    #自定义价格区间
-                    LeftMoey = LeftMoey - single_cost_money
-                else:
-                    #不在价格区间不买,手数设置为0
-                    SingleNum       = 0
-                '''
-                if LeftMoey <= 0:
-                    LeftMoey = 0
-                #print(f'LeftMoey:{LeftMoey}元\n')
-                #print(f'LastPrice_ATR:{LastPrice_ATR},SingleNum:{SingleNum},single_buy_max:{single_buy_max},single_cost_money:{single_cost_money}')
-                classlocal.LeftMoey             = LeftMoey
-
-                #print(f'code:{code},Kindex:{Kindex},td:{td},SingleNum:{SingleNum},NATR:{NATR},LastPrice:{LastPrice}')
-                #剩余金额够买剩下的,就分配手数
-                M_df.loc[code,'Kindex']         = Kindex
-                M_df.loc[code,'Kindex_time']    = td
-                M_df.loc[code,'SingleNum']      = SingleNum
-                M_df.loc[code,'ATR_BuyK']       = NATR
-                M_df.loc[code,'LastPrice']      = LastPrice
-                if SingleNum >= 100 :
-                    M_df.loc[code,'SingleNum']  = SingleNum
-                else :
-                    M_df.loc[code,'SingleNum']  = 0
-                    #因为剩余资金不够买100手就不买了
-                    #break
-                #print('SingleNum',SingleNum)
+            if LeftMoey <= 0:
+                LeftMoey = 0
+            classlocal.LeftMoey             = LeftMoey
+            #剩余金额够买剩下的,就分配手数
+            M_df.loc[code,'Kindex']         = classlocal.Kindex
+            M_df.loc[code,'Kindex_time']    = classlocal.Kindex_time
+            M_df.loc[code,'SingleNum']      = single_buy_max
+            if single_buy_max >= 1 :
+                M_df.loc[code,'SingleNum']  = single_buy_max
+            else :
+                M_df.loc[code,'SingleNum']  = 0
     return M_df
 #查询股份/可用资金等
 
@@ -1602,11 +1521,11 @@ def model_process(ContextInfo,check_list):
             opens               = h_data[code]['open']
             volumes             = h_data[code]['volume']
 
-        closes_opens_dict   = closes - opens
+        #closes_opens_dict   = closes - opens
         closemin            = closes.min()
         openmin             = opens.min()
         #34日
-        len                 = 20#classlocal.modul_length
+        len                 = 20                    #classlocal.modul_length
         lowmin              = lows[-len:].min()
         #暂时改为6日的最高点
         highmax             = highs[-8:].max()
@@ -1634,7 +1553,7 @@ def model_process(ContextInfo,check_list):
             volume  = np.array(volumes)
             #print(code,close)
             #opens_serious        = np.array(opens)
-            closes_opens_serious = np.array(closes_opens_dict)
+            #closes_opens_serious = np.array(closes_opens_dict)
             #closes_opens         = closes_opens_serious
             classlocal.close     = close
             classlocal.open      = open

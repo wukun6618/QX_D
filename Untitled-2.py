@@ -219,7 +219,7 @@ def init(ContextInfo):
     stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal1.csv'
     user_buy_list_path      = 'C:\\Users\\wukun\\Desktop\\tradehistory\\userbuylist.csv'
     stockrecord             = 'C:\\Users\\wukun\\Desktop\\tradehistory\\tradehistoryrecord.csv'
-    Max_buynums             = 8
+    Max_buynums             = 3
 
     M_Start_Time            = "09:25:00"
     M_End_Time              = "02:57:00"
