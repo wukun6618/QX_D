@@ -31,14 +31,14 @@ classlocal = b()
 classlocal.printmoney_en            = 0
 classlocal.printlocalhold_en        = 0
 classlocal.sell_debug_inf_en        = 0
-classlocal.checklist_debug_en       = 0 #打印本地自选股行情
+classlocal.checklist_debug_en       = 1 #打印本地自选股行情
 classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
-classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
+classlocal.model_df_level2_debug_en = 1 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
 classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
-classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
+classlocal.ZXCS_debug_en            = 1 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
 
 classlocal.Red_TPDYX_debug_en       = 0 #debug信息打印
@@ -349,6 +349,7 @@ def handlebar(ContextInfo):
             else :
                 model_df_level2 = model_df_level2
         if classlocal.ZXCS_debug_en:
+            classlocal.count    += 1
             print(f'\n周期函数执行:  第{classlocal.count}次')
             print('K线时间:',index_time)
             print(f'\n当前时间: {dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
@@ -785,8 +786,8 @@ def model_process(ContextInfo,check_list):
             if classlocal.Green_TPDYX_en:
                 rows        = h_data.shape[0] 
                 if  rows< classlocal.MA_long_length + 9:
-                    print(f'code:{code},行数:{rows}')
-                    print(f'计算均线数据长度不够结束本次筛选\n')
+                    #print(f'code:{code},行数:{rows}')
+                    #print(f'计算均线数据长度不够结束本次筛选\n')
                     Green_TPDYX                 = 0
                 else :
             #昨日13日收盘价均值
@@ -802,8 +803,8 @@ def model_process(ContextInfo,check_list):
             if classlocal.Red_TPDYX_en:
                 rows        = h_data.shape[0] 
                 if  rows< classlocal.MA_long_length + 9:
-                    print(f'code:{code},行数:{rows}')
-                    print(f'计算均线数据长度不够结束本次筛选\n')
+                    #print(f'code:{code},行数:{rows}')
+                    #print(f'计算均线数据长度不够结束本次筛选\n')
                     Red_TPDYX                    = 0
                 else:    
                     #昨日13日收盘价均值
