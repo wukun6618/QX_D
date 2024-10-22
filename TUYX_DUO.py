@@ -83,7 +83,7 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
@@ -102,7 +102,7 @@ classlocal.buy_code_count           = 0                 # 03 风控函数，防�
 classlocal.Reflash_buy_list         = 1
 classlocal.lefthand_checken         = 1                 # 1 打开行情止损 0 关闭
 classlocal.LongMarginRatio_add      = 0.45              # 在最低保证金基础增肌的比例
-classlocal.close_atr_trade_en       = 0                 #
+classlocal.close_atr_trade_en       = 0                 #0：关掉ART 1:打开ATR行情止盈
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
 classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
 
