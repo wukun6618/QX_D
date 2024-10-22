@@ -1144,7 +1144,7 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 classlocal.profit           = local_hold.loc[code,'PositionProfit']
                 classlocal.middleprice      = 0
                 classlocal.tradestatus      = ''
-                classlocal.modle            = 'RED_TPDYX'
+                classlocal.modle            = 'Red_TPDYX'
                 send_message_to_feishu(classlocal)
                 local_hold.loc[code,'nCanUseVolume'] = 0
                 local_hold.loc[code,'nVolume']       = 0
@@ -1631,7 +1631,7 @@ def model_process(ContextInfo,check_list):
                 middleprice                 = decimal_places_are_rounded(middlepricet,3)
                 classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
-                classlocal.modle            = 'RED_TPDYX'
+                classlocal.modle            = 'Red_TPDYX'
                 #防止多次发送，只发送一次
                 if (classlocal.LastKindex    != classlocal.Kindex):
                     send_message_to_feishu(classlocal)
