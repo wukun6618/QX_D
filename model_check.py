@@ -42,11 +42,11 @@ classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 1 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
 
-classlocal.RED_TPDYX_debug_en           = 0 #debug信息打印
-classlocal.RED_TPDYX_STOP_DEBUG         = 0 #行情止损打印
+classlocal.Red_TPDYX_debug_en           = 0 #debug信息打印
+classlocal.Red_TPDYX_STOP_DEBUG         = 0 #行情止损打印
 
-classlocal.GREEN_TPDYX_debug_en           = 0 #debug信息打印
-classlocal.GREEN_TPDYX_STOP_DEBUG         = 0 #行情止损打印
+classlocal.Green_TPDYX_debug_en           = 0 #debug信息打印
+classlocal.Green_TPDYX_STOP_DEBUG         = 0 #行情止损打印
 classlocal.check_list               = ['SA00.ZF']
 classlocal.check_list_debug_en      = 0 #自定义行情品种
 
@@ -93,20 +93,20 @@ classlocal.qxlcksp                  = 8888
 classlocal.qxdf                     = 0.03   #七星下跌幅度
 classlocal.exzf                     = 0.0015 #七星二型最后一根阳线涨幅
 #大阳线均线突破
-classlocal.RED_TPDYX_en                 = 0
-classlocal.RED_TPDYX                    = 0
-classlocal.RED_TPDYXsp                  = 8888
+classlocal.Red_TPDYX_en             = 0
+classlocal.Red_TPDYX                = 0
+classlocal.Red_TPDYXsp              = 8888
 classlocal.volume                   = 0
-classlocal.selRED_TPDYX_stopcheck       = 0
-classlocal.sellRED_TPDYX_time           = 16    #买入后多久执行
+classlocal.selRed_TPDYX_stopcheck   = 0
+classlocal.sellRed_TPDYX_time       = 16    #买入后多久执行
 
 #大阳线均线突破
-classlocal.GREEN_TPDYX_en                 = 1
-classlocal.GREEN_TPDYX                    = 0
-classlocal.GREEN_TPDYXsp                  = 8888
+classlocal.Green_TPDYX_en           = 1
+classlocal.Green_TPDYX              = 0
+classlocal.Green_TPDYXsp            = 8888
 classlocal.volume                   = 0
-classlocal.selGREEN_TPDYX_stopcheck       = 0
-classlocal.sellGREEN_TPDYX_time           = 16    #买入后多久执行
+classlocal.selGreen_TPDYX_stopcheck = 0
+classlocal.sellGreen_TPDYX_time     = 16    #买入后多久执行
 
 #神零
 classlocal.shenling_en              = 0
@@ -128,7 +128,6 @@ classlocal.Price_SetSellYratio      = DEFAULT_NUMBER_OF_POINTS*YKB  #
 classlocal.Price_SellS1_ATRratio    = 15    #ATR棘轮止损默认
 classlocal.Price_SellY1_ATRratio    = 0.01   #ATR 止盈 默认比例 越大约灵敏大
 classlocal.TC_ATRratio              = 1.0
-
 
 classlocal.Price_SellY              = 0     #棘轮止盈利开始价格
 classlocal.Price_SellY1             = 0     #棘轮止盈止盈价格,根据ATR值相关
@@ -156,38 +155,38 @@ classlocal.eastmoney_zx_name_list   = ''
 classlocal.stockPath_hold           = ''
 classlocal.user_buy_list            = ''
 
-classlocal.tradestatus      = ''
-classlocal.trade_direction  = 'kong' #duo #kong
-classlocal.code             = 'SA00.SF'
-classlocal.kindextime       = '20241016093000'
-classlocal.timetype         = '15m'
-classlocal.tradetype        = 'open'  #open #close
-classlocal.tradedata        = ''
-classlocal.stop             = 0
-classlocal.takprofit        = 0
+classlocal.tradestatus              = ''
+classlocal.trade_direction          = 'kong' #duo #kong
+classlocal.code                     = 'SA00.SF'
+classlocal.kindextime               = '20241016093000'
+classlocal.timetype                 = '15m'
+classlocal.tradetype                = 'open'  #open #close
+classlocal.tradedata                = ''
+classlocal.stop                     = 0
+classlocal.takprofit                = 0
 
-classlocal.last_price       = 0
-classlocal.profit           = 0
-classlocal.middleprice      = 0
-classlocal.tradestatus      = ''
-classlocal.modle            = ''
-classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/763bec44-0f8e-447b-8341-2e567d7fd6a8'#'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
-classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/763bec44-0f8e-447b-8341-2e567d7fd6a8'#'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
+classlocal.last_price               = 0
+classlocal.profit                   = 0
+classlocal.middleprice              = 0
+classlocal.tradestatus              = ''
+classlocal.modle                    = ''
+classlocal.URLopen                  = 'https://open.feishu.cn/open-apis/bot/v2/hook/763bec44-0f8e-447b-8341-2e567d7fd6a8'#'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
+classlocal.URLclose                 = 'https://open.feishu.cn/open-apis/bot/v2/hook/763bec44-0f8e-447b-8341-2e567d7fd6a8'#'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
 
 # -------------------------------------------#
 # -------------------------------------------#
 # 判断类型
-classlocal.BuyPK    = False  # 开多条件
-classlocal.SellPK   = False  # 开空条件
-classlocal.BuyAK    = False  # 加多条件
-classlocal.SellAK   = False  # 加空条件
-classlocal.BuyA     = False  # 加仓使能
-classlocal.SellA    = False  # 加空使能
-classlocal.BuyS     = False  # 多头止损
-classlocal.SellS    = False  # 空头止损
-classlocal.BuyY     = False  # 空头止盈
-classlocal.SellY    = False  # 多头止盈
-classlocal.ISfirst  = True   # 多头止盈
+classlocal.BuyPK                    = False  # 开多条件
+classlocal.SellPK                   = False  # 开空条件
+classlocal.BuyAK                    = False  # 加多条件
+classlocal.SellAK                   = False  # 加空条件
+classlocal.BuyA                     = False  # 加仓使能
+classlocal.SellA                    = False  # 加空使能
+classlocal.BuyS                     = False  # 多头止损
+classlocal.SellS                    = False  # 空头止损
+classlocal.BuyY                     = False  # 空头止盈
+classlocal.SellY                    = False  # 多头止盈
+classlocal.ISfirst                  = True   # 多头止盈
 
 ###################################start###########################################################################
 #
@@ -440,7 +439,7 @@ def QXLCK_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
 ###################################start###########################################################################
 #
 ###################################start###########################################################################
-def RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
+def Red_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     close           = classlocal.close
     open            = classlocal.open
     low             = classlocal.low[-20:]
@@ -456,7 +455,7 @@ def RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
 
 
     righthand       = DTCS and YXSC and JRZGD
-    if classlocal.RED_TPDYX_debug_en:
+    if classlocal.Red_TPDYX_debug_en:
         if righthand:
             print("\nDTCS:",DTCS)
             print("\nYXSC:",YXSC)
@@ -465,20 +464,20 @@ def RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
             print("\nhigh:",high)
             print("\nhighmax:",highmax)
             print("\nlowmin:",lowmin)
-        #print("\nselRED_TPDYX_stopcheck:",classlocal.selRED_TPDYX_stopcheck)
+        #print("\nselRed_TPDYX_stopcheck:",classlocal.selRed_TPDYX_stopcheck)
 
-    classlocal.RED_TPDYX    =  0
+    classlocal.Red_TPDYX    =  0
     if (righthand):
-        classlocal.RED_TPDYX    = 1
-        classlocal.RED_TPDYXsp  = low_12
+        classlocal.Red_TPDYX    = 1
+        classlocal.Red_TPDYXsp  = low_12
     else:
-        classlocal.RED_TPDYX    = 0
-        classlocal.RED_TPDYXsp  = 8888
+        classlocal.Red_TPDYX    = 0
+        classlocal.Red_TPDYXsp  = 8888
 
 ###################################start###########################################################################
 #回调低突破大阴线
 ###################################start###########################################################################
-def GREEN_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
+def Green_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     close           = classlocal.close
     open            = classlocal.open
     low             = classlocal.low[-10:]
@@ -495,7 +494,7 @@ def GREEN_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     high_12         = max(high[-2],high[-3],high[-4])
 
     righthand       = DTCS and YXSC and JRZGD
-    if classlocal.GREEN_TPDYX_debug_en:
+    if classlocal.Green_TPDYX_debug_en:
         if righthand:
             print("\nDTCS:",DTCS)
             print("\nYXSC:",YXSC)
@@ -505,13 +504,13 @@ def GREEN_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
             print("\nhighmax:",highmax)
             print("\nlowmin:",lowmin)
 
-    classlocal.GREEN_TPDYX    =  0
+    classlocal.Green_TPDYX    =  0
     if (righthand):
-        classlocal.GREEN_TPDYX    = 1
-        classlocal.GREEN_TPDYXsp  = high_12
+        classlocal.Green_TPDYX    = 1
+        classlocal.Green_TPDYXsp  = high_12
     else:
-        classlocal.GREEN_TPDYX    = 0
-        classlocal.GREEN_TPDYXsp  = 8888
+        classlocal.Green_TPDYX    = 0
+        classlocal.Green_TPDYXsp  = 8888
 ###################################start###########################################################################
 #classlocal.shenling    = 0
 #classlocal.shenlingsp  = 8888
@@ -762,59 +761,68 @@ def model_process(ContextInfo,check_list):
             classlocal.lowmin    = lowmin
             classlocal.volume    = volume
 
-            #昨日13日收盘价均值
-            MA_middle                = np.mean(close[-classlocal.MA_middle_length-1:-1])
-            MA_middle_7              = np.mean(close[-(classlocal.MA_middle_length+7):-7])
-            #昨日34日收盘价均值
-            MA_long                = np.mean(close[-classlocal.MA_long_length-1:-1])
-            MA_long_7              = np.mean(close[-(classlocal.MA_long_length+7):-7])
-
             qxlck                = 0
             diao                 = 0
-            RED_TPDYX            = 0
-            GREEN_TPDYXsp        = 0
-            GREEN_TPDYX          = 0
-            if classlocal.GREEN_TPDYX_en:
-                rows        = h_data.shape[0] 
-                if  rows< classlocal.MA_long_length + 9:
-                    print(f'code:{code},行数:{rows}')
-                    print(f'计算均线数据长度不够结束本次筛选\n')
-                    GREEN_TPDYX                        = 0
-                else :
-                    GREEN_TPDYX_checkout(MA_middle,MA_middle_7,MA_long,MA_long_7)
-                    GREEN_TPDYX                        = classlocal.GREEN_TPDYX
-                    GREEN_TPDYXsp                      = classlocal.GREEN_TPDYXsp
+            Red_TPDYX            = 0
+            Green_TPDYX          = 0
 
             if classlocal.qxlck_en :
+                MA_middle_length                = 13
+                MA_long_length                  = 34
+                #昨日13日收盘价均值
+                MA_middle                       = np.mean(close[-(MA_middle_length+1):-1])
+                MA_middle_7                     = np.mean(close[-(MA_middle_length+7):-7])
+                #昨日34日收盘价均值
+                MA_long                         = np.mean(close[-(MA_long_length+1):-1])
+                MA_long_7                       = np.mean(close[-(MA_long_length+7):-7])
                 QXLCK_checkout(MA_middle,MA_middle_7,MA_long,MA_long_7)
-                qxlck                    = classlocal.qxlck
-                qxlcksp                  = classlocal.qxlcksp
+                qxlck                           = classlocal.qxlck
+                qxlcksp                         = classlocal.qxlcksp
             if classlocal.diao_en :
                 YJSD_checkout()
-                diao                         = classlocal.diao
-                diaosp                       = classlocal.diaosp
+                diao                            = classlocal.diao
+                diaosp                          = classlocal.diaosp
 
-            if classlocal.RED_TPDYX_en:
+            if classlocal.Green_TPDYX_en:
                 rows        = h_data.shape[0] 
                 if  rows< classlocal.MA_long_length + 9:
                     print(f'code:{code},行数:{rows}')
                     print(f'计算均线数据长度不够结束本次筛选\n')
-                    RED_TPDYX                    = 0
+                    Green_TPDYX                 = 0
+                else :
+            #昨日13日收盘价均值
+                    MA_middle                   = np.mean(close[-classlocal.MA_middle_length-1:-1])
+                    MA_middle_7                 = np.mean(close[-(classlocal.MA_middle_length+7):-7])
+                    #昨日34日收盘价均值
+                    MA_long                     = np.mean(close[-classlocal.MA_long_length-1:-1])
+                    MA_long_7                   = np.mean(close[-(classlocal.MA_long_length+7):-7])
+                    Green_TPDYX_checkout(MA_middle,MA_middle_7,MA_long,MA_long_7)
+                    Green_TPDYX                 = classlocal.Green_TPDYX
+                    Green_TPDYXsp               = classlocal.Green_TPDYXsp
+
+            if classlocal.Red_TPDYX_en:
+                rows        = h_data.shape[0] 
+                if  rows< classlocal.MA_long_length + 9:
+                    print(f'code:{code},行数:{rows}')
+                    print(f'计算均线数据长度不够结束本次筛选\n')
+                    Red_TPDYX                    = 0
                 else:    
-                    MA1_short                    = MA_middle
-                    MA1_short7                   = MA_middle_7
-                    MA2_long                     = MA_long
-                    MA2_long7                    = MA_long_7
-                    RED_TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7)
-                    RED_TPDYX                    = classlocal.RED_TPDYX
-                    RED_TPDYXsp                  = classlocal.RED_TPDYXsp
+                    #昨日13日收盘价均值
+                    MA_middle                    = np.mean(close[-classlocal.MA_middle_length-1:-1])
+                    MA_middle_7                  = np.mean(close[-(classlocal.MA_middle_length+7):-7])
+                    #昨日34日收盘价均值
+                    MA_long                      = np.mean(close[-classlocal.MA_long_length-1:-1])
+                    MA_long_7                    = np.mean(close[-(classlocal.MA_long_length+7):-7])
+                    Red_TPDYX_checkout(MA_middle,MA_middle_7,MA_long,MA_long_7)
+                    Red_TPDYX                    = classlocal.Red_TPDYX
+                    Red_TPDYXsp                  = classlocal.Red_TPDYXsp
 
             #---------------------------------------------------------------------------------------
             last_price                       = close[-1]
             #---------------------------------------------------------------------------------------
-            if GREEN_TPDYX:
+            if Green_TPDYX:
                 str_modelname                = "大阴线突破"
-                G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(GREEN_TPDYXsp,2)
+                G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(Green_TPDYXsp,2)
 
                 G_df.loc[code,'Tradingday']  = td
                 sp_price                     = G_df.loc[code,'Price_SellS']
@@ -936,9 +944,9 @@ def model_process(ContextInfo,check_list):
                 classlocal.modle            = str_modelname
                 send_message_to_feishu(classlocal)
                 
-            if RED_TPDYX:
+            if Red_TPDYX:
                 str_modelname                 = "大阳线突破"
-                G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(RED_TPDYXsp,2)
+                G_df.loc[code,'Price_SellS'] = decimal_places_are_rounded(Red_TPDYXsp,2)
 
                 G_df.loc[code,'ATR_BuyK']    = buy_atr
                 G_df.loc[code,'Tradingday']  = td
