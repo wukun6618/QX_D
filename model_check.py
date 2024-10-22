@@ -1,5 +1,4 @@
 #encoding:gbk
-
 import pandas as pd
 import numpy as np
 import datetime as dt
@@ -29,24 +28,24 @@ class b():
     pass
 classlocal = b()
 
-classlocal.printmoney_en            = 1
-classlocal.printlocalhold_en        = 1
+classlocal.printmoney_en            = 0
+classlocal.printlocalhold_en        = 0
 classlocal.sell_debug_inf_en        = 0
 classlocal.checklist_debug_en       = 0 #打印本地自选股行情
 classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
-classlocal.ZXCS_debug_en            = 1 #执行周期和次数打印
+classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
 
-classlocal.Red_TPDYX_debug_en           = 0 #debug信息打印
-classlocal.Red_TPDYX_STOP_DEBUG         = 0 #行情止损打印
+classlocal.Red_TPDYX_debug_en       = 0 #debug信息打印
+classlocal.Red_TPDYX_STOP_DEBUG     = 0 #行情止损打印
 
-classlocal.Green_TPDYX_debug_en           = 0 #debug信息打印
-classlocal.Green_TPDYX_STOP_DEBUG         = 0 #行情止损打印
+classlocal.Green_TPDYX_debug_en     = 0 #debug信息打印
+classlocal.Green_TPDYX_STOP_DEBUG   = 0 #行情止损打印
 classlocal.check_list               = ['SA00.ZF']
 classlocal.check_list_debug_en      = 0 #自定义行情品种
 
@@ -1185,28 +1184,28 @@ def close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit):
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"modle      :{}".format(modle),
+                        "content":"modle          :{}".format(modle),
                     }
                 },
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"lastprice   :{}".format(lastprice),
+                        "content":"lastprice       :{}".format(lastprice),
                     }
                 },
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"Stop        :{}".format(stop),
+                        "content":"Stop              :{}".format(stop),
                     }
                 },
                 {
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"takeprofit   :{}".format(takeprofit),
+                        "content":"takeprofit     :{}".format(takeprofit),
                     }
                 },
                 {

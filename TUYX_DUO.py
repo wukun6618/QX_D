@@ -68,7 +68,7 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x) # dataframe格式化
 
 list_data_values                    = []#[[0,0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 ATR_LEN                             = 5
-YKB                                 = 3
+YKB                                 = 3.5
 DEFAULT_NUMBER_OF_POINTS            = 0.02
 TRADE_DIRECT                        = 48
 class b():
@@ -83,7 +83,7 @@ classlocal.Index_time_debug_en      = 0
 classlocal.Trade_init_debug_en      = 0 #
 classlocal.model_df_level2_debug_en = 0 #模型选出列表购买列表
 classlocal.JLZY_debug_en            = 0 #棘轮止盈打印
-classlocal.huicedebug_en            = 1 #回测的时候打开，运行的时候关闭
+classlocal.huicedebug_en            = 0 #回测的时候打开，运行的时候关闭
 classlocal.mp_debug_origin_en       = 0 #模型选出打印
 classlocal.ZXCS_debug_en            = 0 #执行周期和次数打印
 classlocal.h_data_debug_en          = 0 #打印执行选股前的行情数据
@@ -101,8 +101,8 @@ classlocal.trade_buy_record_dict    = {}                # 02 买入交易记录
 classlocal.buy_code_count           = 0                 # 03 风控函数，防止买入过多。
 classlocal.Reflash_buy_list         = 1
 classlocal.lefthand_checken         = 1                 # 1 打开行情止损 0 关闭
-classlocal.LongMarginRatio_add      = 0.45               # 在最低保证金基础增肌的比例
-
+classlocal.LongMarginRatio_add      = 0.45              # 在最低保证金基础增肌的比例
+classlocal.close_atr_trade_en       = 0                 #
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
 classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
 
@@ -184,11 +184,11 @@ classlocal.timetype         = '15m'
 classlocal.tradetype        = 'open'  #open #close
 classlocal.tradedata        = ''
 classlocal.stop             = 0
-classlocal.takeprofit        = 0
+classlocal.takprofit        = 0
 
 classlocal.last_price       = 0
 classlocal.profit           = 0
-classlocal.mediumprice      = 0
+classlocal.middleprice      = 0
 classlocal.tradestatus      = ''
 classlocal.modle            = ''
 classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
@@ -717,6 +717,10 @@ def handlebar(ContextInfo):
                 #据开仓多久
                 BarSinceEntry                                   = 0
                 Price_SellY_Flag                                = 1
+                if classlocal.close_atr_trade_en == 0:
+                    Price_SellY_Flag                            = 0
+                    Sell_list.append(code)
+                
             #---------------------------------------------------------------------------------------------------------------------------
             #print('Price_SellY_Flag',Price_SellY_Flag)
             if Price_SellY_Flag :
@@ -1324,7 +1328,9 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and\
                       (close[-2]>open[-2])  #阳线上穿
     JRZGD           = high[-2] >= highmax   #突破这天就是近日最高点
-    low_12          = min(low[-2],low[-3],low[-4],low[-5])
+    #五日最低点
+    low15           = low[-5:]
+    low_12          = min(low15)
 
     righthand       = DTCS and YXSC and JRZGD
     if classlocal.TPDYX_debug_en:
