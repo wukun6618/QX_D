@@ -12,16 +12,16 @@ classlocal.timetype         = '15m'
 classlocal.tradetype        = 'open'  #open #close
 classlocal.tradedata        = ''
 classlocal.stop             = 123
-classlocal.takprofit        = 565656
+classlocal.takeprofit        = 565656
 
 classlocal.last_price       = 555
 classlocal.profit           = -99
-classlocal.middleprice      = 555
+classlocal.mediumprice      = 555
 classlocal.tradestatus      = ''
 classlocal.modle            = 'TPDYX'
 classlocal.URLopen          = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
 classlocal.URLclose         = 'https://open.feishu.cn/open-apis/bot/v2/hook/fb5aa4f9-16b9-49f2-8e3b-2583ec3f3e3e'
-def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice):
+def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,mediumprice):
     if trade_direction == 'duo':
         Head_color = 'Purple'
     else:
@@ -53,7 +53,7 @@ def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,mi
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"middleprice :{}".format(middleprice),
+                        "content":"mediumprice :{}".format(mediumprice),
                     }
                 },
                 {
@@ -67,7 +67,7 @@ def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,mi
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"takprofit       :{}".format(takprofit),
+                        "content":"takeprofit       :{}".format(takeprofit),
                     }
                 }
 
@@ -77,7 +77,7 @@ def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,mi
     return card_message
 
 
-def close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit):
+def close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit):
     if profit >= 0 :
         Head_color = 'red'
     else :
@@ -115,7 +115,7 @@ def close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit):
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"takprofit   :{}".format(takprofit),
+                        "content":"takeprofit   :{}".format(takeprofit),
                     }
                 },
                 {
@@ -154,7 +154,7 @@ def send_message_to_feishu(classlocal):
     tradetype               = classlocal.tradetype       # 
 
     stop                    = classlocal.stop
-    takprofit               = classlocal.takprofit
+    takeprofit               = classlocal.takeprofit
     lastprice               = classlocal.last_price
     profit                  = classlocal.profit
     modle                   = classlocal.modle
@@ -162,31 +162,31 @@ def send_message_to_feishu(classlocal):
     if trade_direction == 'duo':
         #open
         if tradetype == 'open':
-            middleprice  = (lastprice - stop)/2 + stop
+            mediumprice  = (lastprice - stop)/2 + stop
             opentype     = 'open'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice)
+            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,mediumprice)
             url1             = classlocal.URLopen
         #close
         else:
             opentype     = 'close'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit)
+            payload      = close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit)
             url1             = classlocal.URLclose
     #kong
     else :
                 #open
         if tradetype == 'open':
-            middleprice  = (stop - lastprice)/2 + lastprice
+            mediumprice  = (stop - lastprice)/2 + lastprice
             opentype     = 'open'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice)
+            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,mediumprice)
             url1             = classlocal.URLopen
         #close
         else:
             opentype     = 'close'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit)
+            payload      = close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit)
             url1             = classlocal.URLclose
 
     headers1                = {'Content-Type': 'application/json'}
