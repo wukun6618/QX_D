@@ -68,7 +68,7 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x) # dataframe格式化
 
 list_data_values                    = []#[[0,0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0]]
 ATR_LEN                             = 5
-YKB                                 = 3.5
+YKB                                 = 3
 DEFAULT_NUMBER_OF_POINTS            = 0.02
 TRADE_DIRECT                        = 48
 class b():
@@ -102,7 +102,7 @@ classlocal.buy_code_count           = 0                 # 03 风控函数，防�
 classlocal.Reflash_buy_list         = 1
 classlocal.lefthand_checken         = 1                 # 1 打开行情止损 0 关闭
 classlocal.LongMarginRatio_add      = 0.45              # 在最低保证金基础增肌的比例
-classlocal.close_atr_trade_en       = 0                 #0：关掉ART 1:打开ATR行情止盈
+classlocal.close_atr_trade_en       = 1                 #0：关掉ART 1:打开ATR行情止盈
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
 classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
 
@@ -241,9 +241,10 @@ def init(ContextInfo):
     singel_zf_lastK         = 0.03
     eastmoney_user_buy_list = ['SFT']# ['FUTURE']
     if classlocal.huicedebug_en:
-        eastmoney_zx_name_listt = ['FT1']
+        
         eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                                 'FT8','FT9','FTA','FTB','FTC']
+        eastmoney_zx_name_listt = ['FT1']
     else:
         eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
                                 'FT8','FT9','FTA','FTB','FTC']
