@@ -234,17 +234,19 @@ def init(ContextInfo):
     stockholdingpath        = 'C:\\Users\\wukun\\Desktop\\tradehistory\\datclasslocal1.csv'
     user_buy_list_path      = 'C:\\Users\\wukun\\Desktop\\tradehistory\\userbuylist.csv'
     stockrecord             = 'C:\\Users\\wukun\\Desktop\\tradehistory\\tradehistoryrecord.csv'
-    Max_buynums             = 2
+    Max_buynums             = 4
 
     M_Start_Time            = "09:25:00"
     M_End_Time              = "02:57:00"
     singel_zf_lastK         = 0.03
     eastmoney_user_buy_list = ['SFT']# ['FUTURE']
     if classlocal.huicedebug_en:
+        eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
+                                'FT8','FT9','FTA','FTB','FTC','FTD','FTE']
         eastmoney_zx_name_listt = ['FT1']
     else:
         eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
-                                'FT8','FT9','FTA','FTB','FTC']
+                                'FT8','FT9','FTA','FTB','FTC','FTD','FTE']
     #当前K线的对应的下标从0开始
     #---------------------------------------------------------------------------
     # 账号为模型交易界面选择账号
