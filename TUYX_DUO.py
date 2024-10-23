@@ -101,8 +101,8 @@ classlocal.trade_buy_record_dict    = {}                # 02 买入交易记录
 classlocal.buy_code_count           = 0                 # 03 风控函数，防止买入过多。
 classlocal.Reflash_buy_list         = 1
 classlocal.lefthand_checken         = 1                 # 1 打开行情止损 0 关闭
-classlocal.LongMarginRatio_add      = 0.45              # 在最低保证金基础增肌的比例
-classlocal.close_atr_trade_en       = 1                 #0：关掉ART 1:打开ATR行情止盈
+classlocal.LongMarginRatio_add      = 0.45               # 在最低保证金基础增肌的比例
+
 # 0：无需刷新stock_level1_lsit 1:需要重新刷新stock_level1_lsit
 classlocal.ATR_open_Length          = 4*ATR_LEN         # 图标bar线数量为20
 
@@ -158,7 +158,7 @@ classlocal.TH_High                  = 100    #价格筛选上线单位元
 ################################################################################################
 
 classlocal.Kindex                   = 0     # 当前K线索引
-classlocal.LastKindex               = 5     # 当前K线索引
+classlocal.Lastkindextime           = ''     # 当前K线索引
 
 classlocal.Kindex_time              = 0     # 当前K线对应的时间
 classlocal.zf_lastK                 = 0     # 当前K线对应的涨幅
@@ -241,9 +241,6 @@ def init(ContextInfo):
     singel_zf_lastK         = 0.03
     eastmoney_user_buy_list = ['SFT']# ['FUTURE']
     if classlocal.huicedebug_en:
-        
-        eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
-                                'FT8','FT9','FTA','FTB','FTC']
         eastmoney_zx_name_listt = ['FT1']
     else:
         eastmoney_zx_name_listt =['FT1','FT2','FT3','FT4','FT5','FT6','FT7',\
@@ -718,10 +715,6 @@ def handlebar(ContextInfo):
                 #据开仓多久
                 BarSinceEntry                                   = 0
                 Price_SellY_Flag                                = 1
-                if classlocal.close_atr_trade_en == 0:
-                    Price_SellY_Flag                            = 0
-                    Sell_list.append(code)
-                
             #---------------------------------------------------------------------------------------------------------------------------
             #print('Price_SellY_Flag',Price_SellY_Flag)
             if Price_SellY_Flag :
@@ -1145,11 +1138,11 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 classlocal.tradetype        = 'close'  #open #close
                 classlocal.tradedata        = ''
                 classlocal.stop             = 0
-                classlocal.takeprofit        = 0
+                classlocal.takprofit        = 0
 
                 classlocal.last_price       = price
                 classlocal.profit           = local_hold.loc[code,'PositionProfit']
-                classlocal.mediumprice      = 0
+                classlocal.middleprice      = 0
                 classlocal.tradestatus      = ''
                 classlocal.modle            = 'Red_TPDYX'
                 send_message_to_feishu(classlocal)
@@ -1329,9 +1322,7 @@ def TPDYX_checkout(MA1_short,MA1_short7,MA2_long,MA2_long7):
     YXSC            = (close[-2] > MA2_long) and (open[-2] < MA2_long) and\
                       (close[-2]>open[-2])  #阳线上穿
     JRZGD           = high[-2] >= highmax   #突破这天就是近日最高点
-    #五日最低点
-    low15           = low[-5:]
-    low_12          = min(low15)
+    low_12          = min(low[-2],low[-3],low[-4],low[-5])
 
     righthand       = DTCS and YXSC and JRZGD
     if classlocal.TPDYX_debug_en:
@@ -1620,8 +1611,8 @@ def model_process(ContextInfo,check_list):
                 sp_price                     = G_df.loc[code,'Price_SellS']
                 Profit_loss_ratio            =  classlocal.Price_SetSellY_YKB
                 zf_zy                        = Calculate_SellY_According_to_SP(last_price,sp_price,Profit_loss_ratio)
-                takeprofit                    = decimal_places_are_rounded(zf_zy,2)
-                G_df.loc[code,'Price_SellY'] = takeprofit
+                takprofit                    = decimal_places_are_rounded(zf_zy,2)
+                G_df.loc[code,'Price_SellY'] = takprofit
                 G_df.loc[code,'Kindex']      = int(index)
                 G_df.loc[code,'tradedirection']        = TRADE_DIRECT  # 48 多 49 ：空
 
@@ -1632,19 +1623,19 @@ def model_process(ContextInfo,check_list):
                 classlocal.tradetype        = 'open'  #open #close
                 classlocal.tradedata        = ''
                 classlocal.stop             = sp_price
-                classlocal.takeprofit        = takeprofit
+                classlocal.takprofit        = takprofit
 
                 classlocal.last_price       = last_price
                 classlocal.profit           = 0
-                mediumpricet                = (high[-1] - low[-1])/2 + last_price
-                mediumprice                 = decimal_places_are_rounded(mediumpricet,3)
-                classlocal.mediumprice      = mediumprice
+                middlepricet                = (high[-1] - low[-1])/2 + last_price
+                middleprice                 = decimal_places_are_rounded(middlepricet,3)
+                classlocal.middleprice      = middleprice
                 classlocal.tradestatus      = ''
                 classlocal.modle            = 'Red_TPDYX'
                 #防止多次发送，只发送一次
-                if (classlocal.LastKindex    != classlocal.Kindex):
+                if (classlocal.Lastkindextime    != classlocal.kindextime):
                     send_message_to_feishu(classlocal)
-                    classlocal.LastKindex    == classlocal.Kindex
+                    classlocal.Lastkindextime    == classlocal.kindextime
     return G_df
 ###################################start###########################################################################
 #calculate_ATR_from_buy_time:计算length 周期内的平均波幅
@@ -1889,7 +1880,7 @@ def print_position_data(obj) :
 ###################################start###########################################################################
 from datetime import datetime
 
-def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,mediumprice):
+def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice):
     if trade_direction == 'duo':
         Head_color = 'Purple'
     else:
@@ -1921,7 +1912,7 @@ def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,m
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"mediumprice :{}".format(mediumprice),
+                        "content":"middleprice :{}".format(middleprice),
                     }
                 },
                 {
@@ -1935,7 +1926,7 @@ def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,m
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"takeprofit       :{}".format(takeprofit),
+                        "content":"takprofit       :{}".format(takprofit),
                     }
                 }
 
@@ -1945,7 +1936,7 @@ def open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,m
     return card_message
 
 
-def close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit):
+def close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit):
     if profit >= 0 :
         Head_color = 'red'
     else :
@@ -1983,7 +1974,7 @@ def close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit):
                     "tag": "div",
                     "text": {
                         "tag": "lark_md",
-                        "content":"takeprofit   :{}".format(takeprofit),
+                        "content":"takprofit   :{}".format(takprofit),
                     }
                 },
                 {
@@ -2022,7 +2013,7 @@ def send_message_to_feishu(classlocal):
     tradetype               = classlocal.tradetype       # 
 
     stop                    = classlocal.stop
-    takeprofit               = classlocal.takeprofit
+    takprofit               = classlocal.takprofit
     lastprice               = classlocal.last_price
     profit                  = classlocal.profit
     modle                   = classlocal.modle
@@ -2030,31 +2021,31 @@ def send_message_to_feishu(classlocal):
     if trade_direction == 'duo':
         #open
         if tradetype == 'open':
-            mediumprice  = (lastprice - stop)/2 + stop
+            middleprice  = (lastprice - stop)/2 + stop
             opentype     = 'open'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,mediumprice)
+            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice)
             url1             = classlocal.URLopen
         #close
         else:
             opentype     = 'close'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit)
+            payload      = close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit)
             url1             = classlocal.URLclose
     #kong
     else :
                 #open
         if tradetype == 'open':
-            mediumprice  = (stop - lastprice)/2 + lastprice
+            middleprice  = (stop - lastprice)/2 + lastprice
             opentype     = 'open'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takeprofit,mediumprice)
+            payload      = open_payload_set(modle,trade_direction,tradedata,lastprice,stop,takprofit,middleprice)
             url1             = classlocal.URLopen
         #close
         else:
             opentype     = 'close'
             tradedata    = opentype +' '+ trade_direction +' '+ code + ' '+ timetype + ' ' + kindextime + ' ' + tradestatus
-            payload      = close_payload_set(modle,tradedata,lastprice,stop,takeprofit,profit)
+            payload      = close_payload_set(modle,tradedata,lastprice,stop,takprofit,profit)
             url1             = classlocal.URLclose
 
     headers1                = {'Content-Type': 'application/json'}
@@ -2068,7 +2059,6 @@ def send_message_to_feishu(classlocal):
             print('发送失败')
     except requests.exceptions.RequestException as e:
         print("发送失败：", e)
-
 
 
 

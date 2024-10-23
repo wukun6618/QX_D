@@ -158,7 +158,7 @@ classlocal.TH_High                  = 100    #价格筛选上线单位元
 ################################################################################################
 
 classlocal.Kindex                   = 0     # 当前K线索引
-classlocal.LastKindex               = 5     # 当前K线索引
+classlocal.Lastkindextime               = 5     # 当前K线索引
 
 classlocal.Kindex_time              = 0     # 当前K线对应的时间
 classlocal.zf_lastK                 = 0     # 当前K线对应的涨幅
@@ -1637,9 +1637,9 @@ def model_process(ContextInfo,check_list):
                 classlocal.tradestatus      = ''
                 classlocal.modle            = 'RED_TPDYX'
                 #防止多次发送，只发送一次
-                if (classlocal.LastKindex    != classlocal.Kindex):
+                if (classlocal.Lastkindextime    != classlocal.Kindex):
                     send_message_to_feishu(classlocal)
-                    classlocal.LastKindex    == classlocal.Kindex
+                    classlocal.Lastkindextime    == classlocal.Kindex
     return G_df
 ###################################start###########################################################################
 #calculate_ATR_from_buy_time:计算length 周期内的平均波幅
