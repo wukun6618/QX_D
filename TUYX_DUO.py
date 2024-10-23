@@ -1125,8 +1125,8 @@ def close_long_position(ContextInfo,Sell_list_t,local_hold):
                 #          卖出   按手数买入  账号   代码  卖5价  价格     可用手数
                 #passorder(opType, orderType, accountid, orderCode, prType, price, volume,strategyName,quickTrade, userOrderId, ContextInfo)
                 #sell_close_ydayfirst(orderCode, volume, sell_style, ContextInfo, '110476')
-                #passorder(0,     1101,     'test',     target,      5,     -1,  10, ContextInfo)
-                #passorder(opType, orderType, accountid, orderCode, prType,  -1,volume, ContextInfo)
+                # 平多，优先平昨
+                #passorder(7,       1101,      C.accID, 'a2501.DF',  5,      0.0, 1,       2,             C)
                 # 平昨多
                 passorder(opType,  orderType, accountid, orderCode, prType,  0.0,  volume, order_now,   ContextInfo)
                 print('PositionProfit:\n',local_hold.loc[code,'PositionProfit'])
